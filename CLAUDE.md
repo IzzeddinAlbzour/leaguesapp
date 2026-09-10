@@ -27,7 +27,7 @@ Next.js 15 App Router · TypeScript · Tailwind v4 · shadcn/ui · Supabase (Pos
 
 - Auth v1: **phone + password**. No SMS OTP — it costs money.
 - Payments: **records only, admin-confirmed**. Cash, bank transfer, Reflect, iBuraq. No gateway.
-- Notifications: Web Push primary. OpenWA is a reach fallback, never auth.
+- Notifications (slice 7): **OpenWA** self-hosted WhatsApp, outbound only, five templated messages. No inbound parsing. Never auth. `docs/OPENWA.md`.
 
 ## Arabic / RTL — non-negotiable
 

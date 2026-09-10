@@ -10,3 +10,7 @@ build/
 
 .serena/
 graphify-out/
+
+# skills CLI artifacts
+.agents/
+skills-lock.json

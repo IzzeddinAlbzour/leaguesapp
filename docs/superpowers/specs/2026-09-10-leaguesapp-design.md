@@ -92,8 +92,11 @@ cities          (id, name_ar, name_en, country_code, currency, timezone)
 -- identity
 profiles        (id -> auth.users, full_name, phone, avatar_url, city_id,
                  birth_date, preferred_position, preferred_foot,
-                 self_rating, role, created_at)
+                 self_rating, role, wa_contact_opened_at, created_at)
                  role: player | venue_owner | admin
+                 wa_contact_opened_at: set by the OpenWA webhook once the user
+                 has messaged the league number (see Notifications). Null until
+                 then; WhatsApp sends are gated on it.
 
 -- venues
 venues          (id, name, city_id, owner_id, formats int[], address,
@@ -137,6 +140,8 @@ payments        (id, league_id, team_id, amount, currency, method, proof_url,
 -- notifications
 notifications      (id, profile_id, type, title, body, link, read_at, created_at)
 push_subscriptions (id, profile_id, endpoint, p256dh, auth, created_at)
+wa_sends           (id, profile_id, template_key, payload jsonb, status, sent_at, created_at)
+                   status: queued | sent | failed | skipped_no_contact
 
 -- views
 standings       (league_id, team_id, played, won, drawn, lost,
@@ -171,6 +176,24 @@ awaiting confirmation
 
 Standings count only matches in `played` or `walkover`. An unconfirmed result is invisible in the table.
 
+## Notifications (slice 7)
+
+WhatsApp via self-hosted OpenWA, **outbound only**. Full rationale and operating rules in `docs/OPENWA.md`.
+
+Five templated messages, nothing more:
+
+| Message | Trigger |
+|---|---|
+| Your full schedule | admin publishes fixtures |
+| Match tomorrow | cron, 24h before kickoff |
+| A result needs your confirmation — carries a **deep link into the app**, not a reply prompt | opposing captain submitted a score |
+| Payment installment due | installment date passes, still unpaid |
+| Standings after the round | admin confirms the last match of a round |
+
+**No inbound parsing.** The one inbound path is the #830 handshake: WhatsApp drops the first message to a number that has never messaged the sender, so onboarding asks the user to text the league number once. The webhook sets `profiles.wa_contact_opened_at` and does nothing else. Every send is gated on that column; a user who has not done the handshake sees an in-app banner instead.
+
+Web Push (the `push_subscriptions` table) is a later Android-side extra, not part of slice 7.
+
 ## Build order
 
 Each slice is one session. A slice is done when its acceptance check passes and `npx tsc --noEmit` is clean.
@@ -185,7 +208,7 @@ Each slice is one session. A slice is done when its acceptance check passes and 
 | 4 | Fixtures | Generated schedule with venue and kickoff per match |
 | 5 | **Results and standings** | Enter a result, opponent confirms, table reorders — **the product exists here** |
 | 6 | Stats and player card | Card renders real numbers; shareable |
-| 7 | Notifications | Web Push arrives on a phone |
+| 7 | Notifications | The five WhatsApp messages fire on their triggers; the #830 handshake gates them |
 
 Slices 0 to 5 are the MVP. Everything after is retention.
 

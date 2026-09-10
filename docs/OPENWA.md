@@ -1,40 +1,71 @@
-# OpenWA assessment — WhatsApp as a notification channel
+# OpenWA — outbound WhatsApp notifications
 
-Repo: `github.com/rmyndharis/OpenWA` · MIT · NestJS · ~14k stars · active (commits daily).
+Repo: `github.com/rmyndharis/OpenWA` · MIT · NestJS · ~14k stars · active.
 Self-hosted HTTP API in front of a reverse-engineered WhatsApp Web client. Not Meta's official API.
 
-## Verdict
+## Decision (2026-09-10)
 
-**Not for the MVP. Add it at slice 7 as the notification reach-layer, exactly where the spec already puts it.**
+OpenWA is the notification channel, used **outbound only**. Target users are iPhone-heavy and iOS Web Push needs a home-screen PWA install first, so Push cannot be the primary channel; WhatsApp is near-universal in Palestine regardless of phone. Web Push stays as the Android-side extra.
 
-It solves a real problem we will have — reaching captains who never install the PWA, and collecting result confirmations by reply — but none of that is on the path to proving the `fixtures → results → standings` engine works, which is the only thing the MVP has to do.
+Built at **slice 7**. Outbound-only means nothing in slices 0–6 depends on it, and there is nothing to notify about before the standings engine exists.
 
-## What it can do for us
+## What we send — five messages, nothing more
 
-| Use | Endpoint | Safety |
+| Message | Trigger | Endpoint |
 |---|---|---|
-| Match-day reminder ("الجمعة 8:00، ملعب السلام، ضد أسود جنين") | `send-template` with `{{vars}}` | Safe — opted-in recipient, low volume |
-| Result-confirmation ping + **capture the reply** ("خصمك سجّل 3-2، رد نعم") | `send-text` out, `message.received` webhook in | Safe, and high value — see below |
-| Payment-installment nudge | `send-template` | Safe |
-| Post-round standings broadcast to all captains | `send-bulk` (≤100/batch, async, 3s jittered pacing) | Safe — 8-team league is 8 messages |
+| Your full schedule | admin publishes fixtures | `send-template` |
+| Match tomorrow | cron, 24h before kickoff | `send-template` |
+| A result needs your confirmation | opposing captain submitted a score | `send-template` with a deep link |
+| Payment installment due | installment date passes, still unpaid | `send-template` |
+| Standings after the round | admin confirms the last match of a round | `send-bulk` (one per captain) |
 
-**The confirmation reply is the strongest case.** The spec's result flow stalls on the opposing captain confirming. A WhatsApp round-trip — we send the score, they reply `نعم`, an HMAC-signed `message.received` webhook hits our app and flips the match to `admin_confirmed` — closes that loop without either captain opening anything. Web Push cannot receive a reply.
+Templates are stored in OpenWA (`POST /templates`, `{{vars}}`), not in our database.
 
-## What it cannot do
+## What we deliberately do NOT do
 
-- **Signup OTP.** WhatsApp silently drops the first message to a number that has never messaged the sender (OpenWA issue #830 — the API returns success, delivery does not happen). Every signup OTP is a first-contact. This is why auth stays phone + password; it is not a limitation we can pace around.
-- **Invite-link delivery to non-users.** Same first-contact problem. The captain pastes the link in their own WhatsApp; we do not send it from the league number.
-- **Run on our current infra.** Needs a persistent host with Docker and ~1 GB RAM (the `whatsapp-web.js` engine drives a headless Chromium, 300–500 MB per session; the compose file sets a 1–2 GB limit). Not serverless, not Vercel, not the Supabase box.
+| Rejected | Why |
+|---|---|
+| Parse inbound replies (`3-2`, `نعم`) | Which match? Two pending? «تلاتة اثنين»? All the complexity lives here. Instead the confirm message carries a **deep link** — «خصمك سجّل 3-2 👈 [أكّد]» — one tap into the app, one button. Zero parsing, and it pulls the user into the app. |
+| Result entry over WhatsApp | The in-app form is ~40 lines and unambiguous. |
+| Payment proof over WhatsApp media | Supabase Storage is already wired for avatars and logos; in-app upload saves nothing. |
+| `ترتيب` / `هدافين` query bot | The public league page already answers this. Send the link. |
+| MOTM poll (`send-poll`) | MOTM is post-MVP. Revisit at slice 6. |
+| Invite-link delivery to non-users | First-contact drop (#830). The captain sends the `wa.me` link from their own WhatsApp. |
+| Signup OTP | First-contact drop (#830). Auth stays phone + password. |
 
-## Cost
+## The one inbound path — the #830 handshake
 
-Not $0 on the stack we have. The one genuinely free host that can run it: **Oracle Cloud Always Free** ARM VM (4 vCPU / 24 GB, free indefinitely, runs Docker). One `docker compose up`.
+WhatsApp silently drops the **first** message to a number that has never messaged the league number (OpenWA issue #830 — the send API returns success, delivery does not happen). Not a ban, not fixable by SIM swap.
 
-Ongoing: a dedicated SIM (never a personal or business number — bans are real, ~50% probability in OpenWA's own risk register, and unappealable through the tool). Plus the ops burden of a number that can get restricted mid-season and a protocol that can break on a WhatsApp update (their R001: 70% probability, needs an operator to pull a fix).
+So every user opens a two-way contact once. Onboarding step after signup: show the league number and «أرسل كلمة "جاهز" إلى الرقم ده عشان تستقبل إشعارات مبارياتك». The `message.received` webhook does exactly one thing — set `profiles.wa_contact_opened_at`. It is not a reply parser.
 
-## If/when we adopt it
+Every send is gated on that column. A user who skipped the handshake gets an in-app banner, never a silently-dropped WhatsApp message.
+
+## The whole build (~200 lines)
+
+```
+sendWhatsApp(profileId, templateKey, vars)   one function, gated on wa_contact_opened_at
+5 templates                                   stored in OpenWA
+1 cron job                                     tomorrow's matches
+5 trigger points                               fixtures / result / round-done / payment-due / cron
+1 webhook route                                sets wa_contact_opened_at, nothing else
+```
+
+## Volume
+
+56 players × (1 reminder + 1 standings) per week ≈ 16 messages/day, spread with 3s jitter. Trivial for the API. Too much to send by hand — ~390 reminders a season — which is what earns the VM.
+
+## Infra and cost
+
+Not $0 on the stack we have. Free host that can run it: **Oracle Cloud Always Free** ARM VM (4 vCPU / 24 GB, free indefinitely, Docker). Needs an Oracle Cloud account. One `docker compose up` with the production compose file.
+
+Ongoing: a dedicated SIM, kept replaceable. A restriction is unappealable through the tool (OpenWA's own risk register rates account ban ~50%). A replacement number needs ~1 week of warmup and a QR re-pair. Protocol breakage on a WhatsApp update (their R001, ~70%) needs an operator to `docker pull` a fixed image.
+
+**Ban risk is about the sending number, not recipients' phones.** WhatsApp watches the league number's send patterns — burst rate, duplicate text, a fresh number reaching strangers. Recipient OS is irrelevant.
+
+## Operating rules
 
 - Engine `whatsapp-web.js`, not `baileys` — lower fingerprint, worth the RAM.
-- `SEND_PACING_ENABLED=true` — age-based daily cap, cold-conversation cap, consecutive-failure breaker. Off by default; turn it on.
-- Dedicated SIM. Warm it for ~1 week before the season (scan QR, chat real contacts, set a photo) before any automated send.
-- Keep Web Push as the primary channel. WhatsApp degrades to reach-only: if the number is restricted, reminders suffer but logins and standings do not.
+- `SEND_PACING_ENABLED=true` — age-based daily cap, cold-conversation cap, failure breaker. Off by default; turn it on.
+- Warm the SIM ~1 week before the season (scan QR, chat real contacts, set a photo) before any automated send.
+- If the number is restricted mid-season: reminders degrade, logins and standings do not. Swap the SIM, re-pair, re-warm.
