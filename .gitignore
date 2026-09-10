@@ -36,3 +36,6 @@ skills-lock.json
 # local agent config & vendored skills
 .claude/
 HANDOFF.md
+
+# vercel
+.vercel
