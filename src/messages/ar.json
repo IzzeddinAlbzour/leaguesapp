@@ -1,0 +1,30 @@
+{
+  "app": {
+    "name": "دوريات",
+    "tagline": "دوريات الهواة في فلسطين"
+  },
+  "nav": {
+    "home": "الرئيسية",
+    "login": "تسجيل الدخول",
+    "register": "حساب جديد",
+    "logout": "خروج"
+  },
+  "auth": {
+    "phone": "رقم الهاتف",
+    "phonePlaceholder": "0599123456",
+    "password": "كلمة السر",
+    "fullName": "الاسم الكامل",
+    "loginTitle": "تسجيل الدخول",
+    "loginSubmit": "دخول",
+    "registerTitle": "حساب جديد",
+    "registerSubmit": "إنشاء الحساب",
+    "haveAccount": "عندك حساب؟",
+    "noAccount": "لسا ما عندك حساب؟",
+    "loggedInAs": "مسجّل دخول كـ",
+    "errorInvalidPhone": "رقم الهاتف مش مضبوط",
+    "errorShortPassword": "كلمة السر لازم 8 حروف على الأقل",
+    "errorBadCredentials": "رقم الهاتف أو كلمة السر غلط",
+    "errorPhoneTaken": "هاد الرقم مسجّل من قبل",
+    "errorGeneric": "صار خطأ، جرّب كمان مرة"
+  }
+}
