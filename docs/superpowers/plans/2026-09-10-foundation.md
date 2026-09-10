@@ -10,6 +10,17 @@
 
 **Spec:** `docs/superpowers/specs/2026-09-10-leaguesapp-design.md`
 
+## Status (2026-09-10)
+
+Tasks 1–5 done and pushed. Task 6 (deploy) is user-gated — needs a Vercel account.
+
+Deviations from the plan as written, all committed:
+- **Next.js 16**, not 15 — `create-next-app@latest` moved past 15; App Router + Server Actions unchanged.
+- **Dark-first palette** from `DESIGN.md`, not the plan's neutral light. An `/impeccable polish` pass ran on the auth surface and added `src/components/ui/` (`Button`, `Field`) + browser-surface theming.
+- **Auth: service-role `admin.createUser`**, not `supabase.auth.signUp`. Supabase's phone provider needs paid SMS and the email "Confirm email" toggle was impractical, so `register()` creates the user with `email_confirm: true` via `src/lib/supabase/admin.ts` (server-only, `SUPABASE_SERVICE_ROLE_KEY`), then signs in. Identity is a synthesized email `<e164>@phone.leaguesps.com`; the real phone + full name flow into `profiles` through the `handle_new_user` trigger reading `user_metadata`. Migrations 0002, 0003 harden this.
+- Supabase project: **"Leagues"** `ovnimtcwjtavlqjhvcgs` (ap-southeast-2). Schema + seed + `src/types/database.ts` all live. Security advisors clean (revoked `EXECUTE` from `PUBLIC` on the definer functions).
+- `wa_contact_opened_at` added to `profiles` in 0001 for slice 7.
+
 ## Global Constraints
 
 - All user-facing copy in Arabic, Palestinian dialect. Never MSA, never translated English.
