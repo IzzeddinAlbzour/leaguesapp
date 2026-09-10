@@ -554,6 +554,7 @@ create table profiles (
   preferred_foot      text,
   self_rating         int check (self_rating between 1 and 5),
   role                user_role not null default 'player',
+  wa_contact_opened_at timestamptz,  -- set by the OpenWA webhook in slice 7; null until the user messages the league number
   created_at          timestamptz not null default now()
 );
 
