@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { normalizePhone, phoneToAuthEmail } from '@/lib/phone';
 
 export type AuthState = { error: string | null };
@@ -18,24 +19,34 @@ export async function register(
   if (!phone) return { error: 'errorInvalidPhone' };
   if (password.length < 8) return { error: 'errorShortPassword' };
 
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.signUp({
+  // Create the user with the service role so no email confirmation is required
+  // (auth runs on a synthesized email; there is no inbox to confirm).
+  const admin = createAdminClient();
+  const { error: createError } = await admin.auth.admin.createUser({
     email: phoneToAuthEmail(phone),
     password,
-    options: { data: { phone, full_name: fullName || null } },
+    email_confirm: true,
+    user_metadata: { phone, full_name: fullName || null },
   });
 
-  if (error) {
+  if (createError) {
     return {
-      error: error.message.toLowerCase().includes('already')
+      error: /already|registered|exists/i.test(createError.message)
         ? 'errorPhoneTaken'
         : 'errorGeneric',
     };
   }
 
-  if (fullName && data.user) {
-    await supabase.from('profiles').update({ full_name: fullName }).eq('id', data.user.id);
-  }
+  // full_name and phone land in profiles via the handle_new_user trigger,
+  // which reads them from user_metadata.
+
+  // Sign the new user in on this session.
+  const supabase = await createClient();
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email: phoneToAuthEmail(phone),
+    password,
+  });
+  if (signInError) return { error: 'errorGeneric' };
 
   revalidatePath('/', 'layout');
   redirect('/');
