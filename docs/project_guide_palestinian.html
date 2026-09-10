@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>دليل مشروع دوريات الشامل 🇵🇸</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+::selection{background:rgba(16,185,129,.35);color:#fff}
+html{scroll-behavior:smooth;scroll-padding-top:4.5rem}
+body{
+  font-family:'IBM Plex Sans Arabic',-apple-system,sans-serif;
+  background:#070b14;
+  color:#e2e8f0;
+  line-height:1.8;
+  font-size:16px;
+  -webkit-font-smoothing:antialiased;
+  font-variant-numeric:tabular-nums;
+  padding-bottom:max(1rem,env(safe-area-inset-bottom));
+}
+
+/* ── Sticky top bar ── */
+.topbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(7,11,20,.88);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid #1e293b;
+  padding:.75rem 1.25rem;
+  padding-top:max(.75rem,env(safe-area-inset-top));
+  display:flex;align-items:center;justify-content:space-between;
+}
+.topbar-brand{display:flex;align-items:center;gap:.6rem;font-weight:700;font-size:1.05rem;color:#fff}
+.topbar-logo{width:32px;height:32px;background:#10b981;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#070b14;font-size:.9rem;font-weight:700}
+.topbar-toc-btn{
+  background:none;border:1px solid #334155;color:#94a3b8;
+  padding:.45rem .8rem;border-radius:6px;font-family:inherit;font-size:.82rem;
+  cursor:pointer;min-height:44px;display:flex;align-items:center;gap:.4rem;
+}
+.topbar-toc-btn:active{background:#1e293b}
+
+/* ── Table of contents overlay ── */
+.toc-overlay{
+  display:none;position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,.7);backdrop-filter:blur(6px);
+}
+.toc-overlay.open{display:block}
+.toc-panel{
+  position:fixed;top:0;bottom:0;right:0;width:min(85vw,320px);z-index:201;
+  background:#0c1322;border-left:1px solid #1e293b;
+  padding:1.5rem 1.25rem;overflow-y:auto;
+  transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);
+}
+.toc-overlay.open .toc-panel{transform:translateX(0)}
+.toc-close{
+  background:none;border:none;color:#94a3b8;font-size:1.5rem;cursor:pointer;
+  width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+  margin-bottom:1rem;
+}
+.toc-list{list-style:none;display:flex;flex-direction:column;gap:.3rem}
+.toc-list a{
+  display:block;padding:.7rem .9rem;color:#94a3b8;text-decoration:none;
+  border-radius:6px;font-size:.9rem;font-weight:500;min-height:44px;
+  display:flex;align-items:center;
+}
+.toc-list a:active{background:#1e293b;color:#10b981}
+
+/* ── Main content ── */
+.content{
+  max-width:720px;
+  margin:0 auto;
+  padding:0 1.25rem;
+}
+
+/* ── Spacing ── */
+section{margin-top:3rem;scroll-margin-top:4.5rem}
+section:first-of-type{margin-top:1.5rem}
+
+/* ── Headings ── */
+h1{font-size:clamp(1.6rem,5vw,2.2rem);font-weight:700;color:#fff;line-height:1.35;letter-spacing:-.02em}
+h2{font-size:clamp(1.2rem,4vw,1.5rem);font-weight:700;color:#fff;margin-bottom:.75rem;padding-bottom:.5rem;border-bottom:1px solid #1e293b}
+h3{font-size:1.05rem;font-weight:600;color:#f1f5f9;margin:1.25rem 0 .5rem}
+
+/* ── Text ── */
+p{color:#94a3b8;margin-bottom:.75rem;font-size:.95rem}
+strong{color:#e2e8f0}
+.lead{font-size:clamp(1rem,3vw,1.1rem);color:#94a3b8;margin-top:.75rem}
+
+/* ── Tags ── */
+.tag{
+  display:inline-flex;align-items:center;gap:.35rem;
+  padding:.2rem .65rem;border-radius:50px;font-size:.78rem;font-weight:600;
+}
+.tag-green{background:rgba(16,185,129,.12);color:#10b981;border:1px solid rgba(16,185,129,.3)}
+.tag-amber{background:rgba(245,158,11,.12);color:#f59e0b;border:1px solid rgba(245,158,11,.3)}
+.tag-rose{background:rgba(244,63,94,.12);color:#f43f5e;border:1px solid rgba(244,63,94,.3)}
+.tag-gray{background:rgba(255,255,255,.06);color:#64748b;border:1px solid #334155}
+
+/* ── Callout ── */
+.callout{
+  background:#0f172a;border:1px solid #1e293b;border-radius:10px;
+  padding:1rem 1.15rem;margin:.75rem 0;font-size:.9rem;color:#cbd5e1;
+}
+.callout-accent{border-right:3px solid #10b981}
+.callout-warn{border-right:3px solid #f59e0b}
+.callout-danger{border-right:3px solid #f43f5e}
+
+/* ── Compare blocks ── */
+.vs{display:flex;flex-direction:column;gap:1rem;margin:.75rem 0}
+.vs-block{background:#0f172a;border:1px solid #1e293b;border-radius:10px;padding:1.1rem}
+.vs-block h3{margin-top:0}
+
+/* ── Tables ── */
+.tbl{
+  width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  background:#0f172a;border:1px solid #1e293b;border-radius:10px;margin:.75rem 0;
+}
+table{width:100%;border-collapse:collapse;font-size:.88rem;text-align:right;min-width:500px}
+th{background:rgba(255,255,255,.03);color:#94a3b8;font-weight:600;padding:.75rem 1rem;border-bottom:1px solid #1e293b;white-space:nowrap;font-size:.8rem}
+td{padding:.75rem 1rem;border-bottom:1px solid #1e293b;color:#cbd5e1;vertical-align:top}
+tr:last-child td{border-bottom:none}
+code{background:rgba(255,255,255,.08);padding:.1rem .35rem;border-radius:3px;font-size:.82rem;color:#6ee7b7;font-family:monospace}
+
+/* ── Code blocks ── */
+pre{
+  background:#04070d;border:1px solid #1e293b;border-radius:10px;
+  padding:1.1rem;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  font-size:.82rem;color:#34d399;font-family:monospace;
+  direction:ltr;text-align:left;margin:.75rem 0;line-height:1.6;
+}
+
+/* ── Roadmap ── */
+.roadmap{list-style:none;display:flex;flex-direction:column;gap:.65rem;margin:.75rem 0}
+.roadmap-item{
+  background:#0f172a;border:1px solid #1e293b;border-radius:8px;
+  padding:1rem 1.1rem;display:flex;flex-direction:column;gap:.3rem;
+}
+.roadmap-row{display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
+.roadmap-item h4{font-size:.95rem;font-weight:600;color:#fff}
+.roadmap-item p{margin:0;font-size:.88rem}
+
+/* ── Forbidden list ── */
+.forbidden-grid{display:grid;grid-template-columns:1fr;gap:.65rem;margin:.75rem 0}
+.forbidden-item{background:#0f172a;border:1px solid #1e293b;border-radius:8px;padding:.9rem 1rem}
+.forbidden-item strong{color:#f43f5e;display:block;font-size:.92rem;margin-bottom:.15rem}
+.forbidden-item p{margin:0;font-size:.86rem}
+
+/* ── Interactive demo ── */
+.demo{background:#0f172a;border:1px solid #1e293b;border-radius:12px;padding:1.25rem;margin:.75rem 0}
+.demo-bar{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;margin-bottom:1rem}
+.demo-bar label{font-size:.9rem;color:#94a3b8}
+.demo-bar input{
+  background:#070b14;border:1px solid #334155;color:#fff;
+  padding:.5rem .75rem;border-radius:6px;font-family:inherit;width:70px;min-height:44px;
+}
+.demo-bar input:focus{border-color:#10b981;outline:none}
+.demo-btn{
+  background:#10b981;color:#070b14;font-weight:600;border:none;
+  padding:.55rem 1.2rem;border-radius:6px;cursor:pointer;font-family:inherit;
+  font-size:.88rem;min-height:44px;
+}
+.demo-btn:active{background:#059669}
+.demo-summary{font-size:.88rem;color:#f59e0b;font-weight:600;margin-bottom:.5rem}
+.demo-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.5rem;
+  max-height:220px;overflow-y:auto;padding:.5rem;
+  background:#070b14;border:1px solid #1e293b;border-radius:8px;
+}
+.demo-match{
+  background:#0f172a;border:1px solid #1e293b;border-radius:6px;
+  padding:.5rem;text-align:center;font-size:.82rem;
+}
+.demo-match small{color:#64748b;display:block;font-size:.72rem}
+.demo-match span{color:#f59e0b;font-weight:600}
+
+/* ── Desktop: wider layout ── */
+@media(min-width:768px){
+  .content{padding:0 2rem}
+  .forbidden-grid{grid-template-columns:1fr 1fr}
+  .vs{flex-direction:row}
+  .vs-block{flex:1}
+}
+@media(min-width:1024px){
+  .content{max-width:800px;padding:0 3rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ── Sticky top bar ── -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-logo">⚽</div>
+    دوريات 🇵🇸
+  </div>
+  <button class="topbar-toc-btn" onclick="openToc()">☰ الفهرس</button>
+</div>
+
+<!-- ── Table of contents overlay ── -->
+<div class="toc-overlay" id="tocOverlay" onclick="closeToc()">
+  <div class="toc-panel" onclick="event.stopPropagation()">
+    <button class="toc-close" onclick="closeToc()">✕</button>
+    <ul class="toc-list">
+      <li><a href="#s1" onclick="closeToc()">1. القصة والهدف</a></li>
+      <li><a href="#s2" onclick="closeToc()">2. أدوات العمل (Claude Code CLI)</a></li>
+      <li><a href="#s3" onclick="closeToc()">3. التك ستاك (العدة)</a></li>
+      <li><a href="#s4" onclick="closeToc()">4. القوانين الصارمة</a></li>
+      <li><a href="#s5" onclick="closeToc()">5. المحرك والأدوار</a></li>
+      <li><a href="#s6" onclick="closeToc()">6. الداتا بيز الشامل (15 جدول)</a></li>
+      <li><a href="#s7" onclick="closeToc()">7. سياسات الأمان (RLS)</a></li>
+      <li><a href="#s8" onclick="closeToc()">8. مسار اعتماد النتائج</a></li>
+      <li><a href="#s9" onclick="closeToc()">9. ترتيب الدوري (SQL View)</a></li>
+      <li><a href="#s10" onclick="closeToc()">10. خوارزمية القرعة (تفاعلي)</a></li>
+      <li><a href="#s11" onclick="closeToc()">11. خطة البناء (8 Slices)</a></li>
+      <li><a href="#s12" onclick="closeToc()">12. التكاليف والاستضافة</a></li>
+      <li><a href="#s13" onclick="closeToc()">13. المستبعدات</a></li>
+      <li><a href="#s14" onclick="closeToc()">14. سيناريو عملي حي</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- ── Header ── -->
+  <header style="margin-top:1.5rem;margin-bottom:2rem">
+    <div style="margin-bottom:.75rem"><span class="tag tag-green">🇵🇸 توثيق شامل 100%</span></div>
+    <h1>الدليل الفني الشامل لمشروع "دوريات"</h1>
+    <p class="lead">
+      ترجمة كاملة لملفات <code>CLAUDE.md</code> و <code>STACK.md</code> و <code>leaguesapp-design.md</code> و <code>foundation.md</code> بلهجة فلسطينية بلدية واضحة، مع شرح كل جدول وكل سطر كود وكل مرحلة من مراحل البناء بالتفصيل.
+    </p>
+  </header>
+
+  <!-- ── 1. Vision ── -->
+  <section id="s1">
+    <h2>1. القصة والهدف</h2>
+    <div class="vs">
+      <div class="vs-block">
+        <h3 style="color:#f43f5e">المشكلة</h3>
+        <p>تنظيم دوري الحارة أو المدينة بيتم عبر جروبات واتساب وملفات إكسل. المواعيد بتتضارب، إحصائيات الأهداف بتضيع، والكابتن بعترض إن الترتيب غلط لأنه مكتوب على ورقة.</p>
+        <div class="callout callout-danger">
+          "فزنا 3-2 ومش محسوب فارق الأهداف! ومين نسي يسجل صاحب الهدف التاني بالجروب؟"
+        </div>
+      </div>
+      <div class="vs-block">
+        <h3 style="color:#10b981">الحل</h3>
+        <p>منصة إلكترونية محكمة. الكابتن بسجل فريقه، الأدمن بولد جدول المباريات بضغطة زر، والترتيب بحسب حاله تلقائياً من واقع النتائج المعتمدة بـ SQL View. مستحيل يغلط.</p>
+        <div class="callout callout-accent">
+          الإطلاق الأول: دوري جنين 7 ضد 7 كرة قدم. البنية مجهزة للتوسع لكل المدن الفلسطينية ولألعاب ثانية (سلة، طائرة).
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 2. Claude Code CLI ── -->
+  <section id="s2">
+    <h2>2. أدوات العمل (Claude Code CLI)</h2>
+    <p>هيك بنشتغل مع الذكاء الاصطناعي عبر Claude Code CLI بضوابط حازمة:</p>
+    <div class="tbl"><table>
+      <thead><tr><th>الأداة / القاعدة</th><th>الأمر</th><th>التفاصيل</th></tr></thead>
+      <tbody>
+        <tr><td><strong>بوابة الابتكار</strong></td><td><code>superpowers:brainstorming</code></td><td>أي ميزة أو شاشة جديدة لازم توقف عند بوابة الموافقة أولاً قبل ما تبدأ تكتب كود.</td></tr>
+        <tr><td><strong>بوابة التصميم</strong></td><td><code>impeccable:impeccable</code></td><td>أي شغل على الواجهات بمر عبر Impeccable وبتسجل القرارات بـ <code>DESIGN.md</code>.</td></tr>
+        <tr><td><strong>فحص TypeScript</strong></td><td><code>npx tsc --noEmit</code></td><td>ممنوع تنهي أي مهمة قبل ما يطلع "No errors".</td></tr>
+        <tr><td><strong>الاختبارات</strong></td><td><code>npm test</code></td><td>تشغيل Vitest على الخوارزمية والوظائف المستقلة.</td></tr>
+        <tr><td><strong>معرفة المخطط</strong></td><td><code>src/types/database.ts</code></td><td>بنقرأ الأنواع المولدة عبر <code>supabase gen types typescript</code>. ممنوع نقرأ الهجرات لمعرفة اسم عمود.</td></tr>
+        <tr><td><strong>نطاق الجلسة</strong></td><td>Vertical Slice وحدة</td><td>كل جلسة بنركز على ميزة وحدة كاملة (مصادقة، أو فرق، أو مباريات) وبننجزها.</td></tr>
+        <tr><td><strong>Server Actions فقط</strong></td><td>لا API Routes</td><td>كل العمليات عبر Server Actions مباشرة بالكود.</td></tr>
+        <tr><td><strong>لا طبقات إضافية</strong></td><td>لا Service Layer / DTOs / Repository</td><td>Server Components + RLS بيعملوا الشغل. لا داعي لتعقيد إضافي.</td></tr>
+        <tr><td><strong>Commit بعد كل مهمة</strong></td><td><code>git commit</code></td><td>كل تاسك منفصل بنعمله كوميت فوراً.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- ── 3. Tech Stack ── -->
+  <section id="s3">
+    <h2>3. التك ستاك (العدة والتقنيات)</h2>
+    <p>تقنيات مجانية بالكامل اليوم، وبتكبر معنا بدون إعادة كتابة الكود:</p>
+    <div class="tbl"><table>
+      <thead><tr><th>الطبقة</th><th>التقنية</th><th>Free Tier</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Framework</strong></td><td>Next.js 15 App Router + TypeScript</td><td>—</td></tr>
+        <tr><td><strong>UI</strong></td><td>Tailwind CSS v4 + shadcn/ui</td><td>مجاني</td></tr>
+        <tr><td><strong>i18n / RTL</strong></td><td>next-intl, <code>dir="rtl"</code>, خصائص منطقية</td><td>مجاني</td></tr>
+        <tr><td><strong>Database</strong></td><td>Supabase Postgres</td><td>500MB</td></tr>
+        <tr><td><strong>Auth</strong></td><td>Supabase Auth — Phone + Password</td><td>50k MAU</td></tr>
+        <tr><td><strong>Storage</strong></td><td>Supabase Storage (صور، لوجوهات)</td><td>1GB</td></tr>
+        <tr><td><strong>Realtime</strong></td><td>Supabase Realtime (ترتيب مباشر)</td><td>مشمول</td></tr>
+        <tr><td><strong>Authorization</strong></td><td>Postgres RLS</td><td>مشمول</td></tr>
+        <tr><td><strong>Hosting</strong></td><td>Vercel (بيتا) → Cloudflare Workers عند الإطلاق</td><td>$0–20</td></tr>
+        <tr><td><strong>Push</strong></td><td>Web Push (VAPID) + PWA</td><td>مجاني</td></tr>
+        <tr><td><strong>Errors</strong></td><td>Sentry</td><td>5k events/شهر</td></tr>
+        <tr><td><strong>Mobile (لاحقاً)</strong></td><td>Expo / React Native</td><td>EAS مجاني</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>ليش Supabase مش Firebase؟</h3>
+    <p>لأن ترتيب الدوري مسألة SQL تجميعية. Firebase (Firestore) بجبرك تحسب الترتيب بالكود أو تخزن عدادات منفصلة بتتزحلق عند أي تعديل. Postgres بحسبها بكويري واحدة ومستحيل تغلط.</p>
+
+    <h3>ليش Phone + Password مش SMS OTP؟</h3>
+    <p>رسائل الـ SMS لفلسطين بتكلف $0.04–0.08 ع الرسالة + رسوم شهرية للرقم. الحل: تسجيل برقم الجوال وكلمة السر بكلفة $0. لما يصير عنا إيرادات، Supabase Auth ببدل المزود بدون ما يتأثر أي شي بالداتا بيز.</p>
+  </section>
+
+  <!-- ── 4. Strict Rules ── -->
+  <section id="s4">
+    <h2>4. القوانين الصارمة</h2>
+    <div class="tbl"><table>
+      <thead><tr><th>القاعدة</th><th>التطبيق</th></tr></thead>
+      <tbody>
+        <tr><td><strong>اللهجة الفلسطينية البلدية</strong></td><td>كل النصوص الموجهة للمستخدم باللهجة البلدية بملف <code>src/messages/ar.json</code>. ممنوع إنجليزي مترجم أو فصحى.</td></tr>
+        <tr><td><strong>التصميم RTL</strong></td><td><code>dir="rtl"</code> على <code>&lt;html&gt;</code>. خصائص CSS منطقية (<code>ms-</code> <code>me-</code> <code>ps-</code> <code>pe-</code>). ممنوع <code>left/right/ml-/mr-</code>.</td></tr>
+        <tr><td><strong>الأرقام</strong></td><td>أرقام غربية (1, 2, 3) بكل المخرجات. تنسيق التاريخ محلي.</td></tr>
+        <tr><td><strong>أعمدة التوسع المبكر</strong></td><td><code>sport_id</code> و <code>city_id</code> و <code>currency</code> على كل جدول مناسب من أول هجرة.</td></tr>
+        <tr><td><strong>النصوص مركزية</strong></td><td>كل كلمة بالتطبيق بتطلع من <code>ar.json</code> عبر <code>next-intl</code>. ممنوع نصوص ثابتة بـ JSX.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- ── 5. Engine & Roles ── -->
+  <section id="s5">
+    <h2>5. المحرك الثلاثي والأدوار</h2>
+    <p>كل شي بالمنصة بيدور حوالين هاد المحرك:</p>
+    <div class="callout callout-accent" style="text-align:center;font-size:1.1rem;font-weight:700;color:#10b981">
+      المباريات (Fixtures) → النتائج (Results) → ترتيب الدوري (Standings)
+    </div>
+    <p>البروفايلات، بطاقات اللاعبين، والملاعب كلها أقمار صناعية. لحد ما الترتيب يحدث حاله تلقائياً بعد مباراة حقيقية، ما في منتج.</p>
+
+    <h3>الأدوار الأربعة:</h3>
+    <div class="tbl"><table>
+      <thead><tr><th>الدور</th><th>الصلاحيات</th></tr></thead>
+      <tbody>
+        <tr><td><strong style="color:#10b981">اللاعب</strong></td><td>تسجيل، استكمال البروفايل، الانضمام لفريق، استعراض الجدول والإحصائيات.</td></tr>
+        <tr><td><strong style="color:#f59e0b">الكابتن</strong></td><td>كل صلاحيات اللاعب + إنشاء فريق، روابط دعوة واتساب، تسجيل الفريق بالدوري، إدخال وتأكيد النتيجة، طلب تأجيل.</td></tr>
+        <tr><td><strong>صاحب الملعب</strong></td><td>يشوف حجوزات ملعبه ومواعيد المباريات (مؤجل لبعد MVP).</td></tr>
+        <tr><td><strong style="color:#f43f5e">المنظم (Admin)</strong></td><td>كل شي: إنشاء دوري، توليد القرعة، تأكيد الدفعات، حسم النزاعات. (مسارات داخلية محمية بـ <code>profiles.role</code>).</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>قرارات فنية مفتاحية:</h3>
+    <div class="callout callout-warn">
+      <strong>الترتيب والإحصائيات Views وليست عدادات مخزنة.</strong> العدادات المخزنة بتتزحلق لما الأدمن يعدل نتيجة غلط أو يلغي مباراة. الـ View بيعيد الحساب من المصدر كل مرة ومستحيل يغلط.
+    </div>
+    <div class="callout">
+      <strong>النتيجة هي المرجع؛ الأحداث هي التوزيع.</strong> <code>home_score</code> و <code>away_score</code> هم الحقيقة. <code>match_events</code> بيسجل مين سجل ومين صنع. مش مطلوب يتطابقوا — بدوريات الهواة حدا دايماً بينسى يسجل هداف.
+    </div>
+    <div class="callout">
+      <strong>قائمة الموسم منفصلة عن عضوية الفريق.</strong> <code>team_members</code> = الفريق الدائم. <code>league_rosters</code> = القائمة المعتمدة لموسم واحد. اللاعب بقدر يكون بقائمة دوري واحد بس.
+    </div>
+    <div class="callout">
+      <strong>قوانين الرياضة تكوين مش كود.</strong> <code>sports</code> فيها <code>points_win</code>, <code>points_draw</code>, <code>allows_draw</code>. كرة قدم، سلة، وطائرة بيختلفوا بصف (row) مش بكود.
+    </div>
+  </section>
+
+  <!-- ── 6. Full Database Schema ── -->
+  <section id="s6">
+    <h2>6. نموذج الداتا بيز الشامل (13 جدول + 2 Views)</h2>
+    <p>تفصيل كامل لكل جدول بالمشروع:</p>
+    <div class="tbl"><table>
+      <thead><tr><th>الجدول</th><th>الأعمدة الرئيسية</th><th>الوظيفة</th></tr></thead>
+      <tbody>
+        <tr><td><code>sports</code></td><td>id, key, name_ar, name_en, default_players_per_side, points_win, points_draw, points_loss, allows_draw</td><td>مرجع الألعاب واحتساب النقاط</td></tr>
+        <tr><td><code>cities</code></td><td>id, name_ar, name_en, country_code, currency, timezone</td><td>مرجع المدن والعملة والتوقيت</td></tr>
+        <tr><td><code>profiles</code></td><td>id→auth.users, full_name, phone, avatar_url, city_id, birth_date, preferred_position, preferred_foot, self_rating, role</td><td>الحساب الشخصي والأدوار</td></tr>
+        <tr><td><code>venues</code></td><td>id, name, city_id, owner_id, formats[], address, price_per_slot, currency, is_active</td><td>بيانات الملاعب</td></tr>
+        <tr><td><code>teams</code></td><td>id, name, slug, logo_url, sport_id, city_id, captain_id, level, is_recruiting</td><td>الفرق والكابتن المسؤول</td></tr>
+        <tr><td><code>team_members</code></td><td>id, team_id, profile_id, jersey_number, status (pending|active|removed)</td><td>أعضاء الفريق الدائمين</td></tr>
+        <tr><td><code>team_invites</code></td><td>token, team_id, created_by, expires_at, used_at</td><td>روابط دعوة الانضمام عبر واتساب</td></tr>
+        <tr><td><code>leagues</code></td><td>id, name, slug, sport_id, city_id, season, players_per_side, roster_min, roster_max, teams_max, rounds, status, entry_fee, deposit_amount, currency, starts_on</td><td>إعدادات البطولة</td></tr>
+        <tr><td><code>league_teams</code></td><td>id, league_id, team_id, status (pending|active|withdrawn)</td><td>اشتراك الفريق بالدوري</td></tr>
+        <tr><td><code>league_rosters</code></td><td>id, league_id, team_id, profile_id, jersey_number</td><td>قائمة الموسم المعتمدة</td></tr>
+        <tr><td><code>matches</code></td><td>id, league_id, round, home/away_team_id, venue_id, kickoff_at, status, home/away_score, home/away/admin_confirmed_at, motm_profile_id</td><td>المباريات والنتائج</td></tr>
+        <tr><td><code>match_events</code></td><td>id, match_id, profile_id, team_id, type (goal|assist|yellow|red|own_goal), minute</td><td>أحداث المباراة</td></tr>
+        <tr><td><code>payments</code></td><td>id, league_id, team_id, amount, currency, method (cash|bank|reflect|iburaq), proof_url, status (pending|confirmed|rejected), recorded_by, confirmed_by</td><td>تسجيل الدفعات</td></tr>
+        <tr><td><code>notifications</code></td><td>id, profile_id, type, title, body, link, read_at</td><td>سجل الإشعارات</td></tr>
+        <tr><td><code>push_subscriptions</code></td><td>id, profile_id, endpoint, p256dh, auth</td><td>اشتراكات Web Push</td></tr>
+        <tr><td><code style="color:#10b981">standings (View)</code></td><td>league_id, team_id, played, won, drawn, lost, goals_for, goals_against, goal_difference, points</td><td>ترتيب الدوري التلقائي</td></tr>
+        <tr><td><code style="color:#10b981">player_stats (View)</code></td><td>league_id, profile_id, matches, goals, assists, yellows, reds</td><td>إحصائيات اللاعبين</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- ── 7. RLS Security ── -->
+  <section id="s7">
+    <h2>7. سياسات الأمان (Postgres RLS)</h2>
+    <div class="tbl"><table>
+      <thead><tr><th>الجدول</th><th>القراءة</th><th>الكتابة</th></tr></thead>
+      <tbody>
+        <tr><td><code>leagues</code>, <code>matches</code>, <code>teams</code>, <code>standings</code></td><td><strong style="color:#10b981">الجميع (anon)</strong> — رابط الدوري العام يفتح بدون تسجيل دخول. هاد مقصود مش غلط: صفحة الدوري المشتركة هي أداة النمو.</td><td>الأدمن فقط</td></tr>
+        <tr><td><code>profiles</code></td><td>المسجلين (authenticated)</td><td>صاحب الحساب فقط</td></tr>
+        <tr><td><code>team_members</code>, <code>league_rosters</code></td><td>المسجلين</td><td>كابتن الفريق</td></tr>
+        <tr><td>حقول النتائج بـ <code>matches</code></td><td>الجميع</td><td>أحد الكباتن يرفع + الآخر أو الأدمن يؤكد</td></tr>
+        <tr><td><code>payments</code></td><td>كابتن الفريق المعني + الأدمن</td><td>الكابتن ينشئ <code>pending</code>؛ الأدمن فقط يؤكد</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- ── 8. Result Confirmation Flow ── -->
+  <section id="s8">
+    <h2>8. مسار اعتماد النتائج</h2>
+    <p>مسار محكم لمنع التلاعب وضمان نزاهة الجدول:</p>
+<pre><code>scheduled (مجدولة)
+   │  الكابتن يدخل النتيجة والأحداث
+   ▼
+awaiting confirmation (بانتظار التأكيد)
+   ├── الكابتن الخصم يؤكد → الأدمن يؤكد → played ✅
+   ├── الكابتن الخصم يعترض → الأدمن يحسم → played ✅
+   └── مرور 48 ساعة بدون رد → الأدمن يحسم → played ✅
+
+⚠️ الترتيب بيحسب فقط المباريات بحالة played أو walkover.
+   نتيجة غير مؤكدة = غير مرئية بالجدول.</code></pre>
+  </section>
+
+  <!-- ── 9. SQL View ── -->
+  <section id="s9">
+    <h2>9. ترتيب الدوري (SQL View)</h2>
+    <p>الاستعلام اللي بيحسب الترتيب تلقائياً من واقع المباريات المكتملة:</p>
+<pre><code>create view standings as
+with rows as (
+  select league_id, home_team_id as team_id,
+         home_score gf, away_score ga
+    from matches where status in ('played','walkover')
+  union all
+  select league_id, away_team_id,
+         away_score, home_score
+    from matches where status in ('played','walkover')
+)
+select league_id, team_id,
+  count(*)                              played,
+  count(*) filter (where gf > ga)       won,
+  count(*) filter (where gf = ga)       drawn,
+  count(*) filter (where gf < ga)       lost,
+  coalesce(sum(gf),0)                   goals_for,
+  coalesce(sum(ga),0)                   goals_against,
+  coalesce(sum(gf - ga),0)              goal_difference,
+  count(*) filter (where gf > ga) * 3
+  + count(*) filter (where gf = ga)     points
+from rows group by league_id, team_id;</code></pre>
+  </section>
+
+  <!-- ── 10. Fixtures Algorithm Demo ── -->
+  <section id="s10">
+    <h2>10. خوارزمية قرعة المباريات</h2>
+    <p>خوارزمية دائرية (Circle Method) نقية بدون أي مكتبة خارجية. بتضمن كل فريق يلعب ضد الكل مرة وحدة ومستحيل يلعب فريق مباراتين بنفس الجولة.</p>
+
+    <div class="demo">
+      <div class="demo-bar">
+        <label for="tc">عدد الفرق:</label>
+        <input type="number" id="tc" value="6" min="2" max="14">
+        <button class="demo-btn" onclick="gen()">توليد الجدول</button>
+      </div>
+      <div class="demo-summary" id="ds"></div>
+      <div class="demo-grid" id="dg"></div>
+    </div>
+  </section>
+
+  <!-- ── 11. Build Roadmap ── -->
+  <section id="s11">
+    <h2>11. خطة البناء (8 Slices)</h2>
+    <p>كل مرحلة = جلسة عمل واحدة مركزة. المرحلة خلصت لما شرط القبول يتحقق و <code>npx tsc --noEmit</code> يطلع نظيف.</p>
+
+    <ul class="roadmap">
+      <li class="roadmap-item">
+        <div class="roadmap-row"><h4>— generateFixtures</h4><span class="tag tag-green">منجز</span></div>
+        <p>الخوارزمية النقية: 8 فرق بتولد 28 مباراة، كل زوج مرة وحدة، ولا فريق بيلعب مرتين بنفس الجولة.</p>
+      </li>
+      <li class="roadmap-item">
+        <div class="roadmap-row"><h4>Slice 0: Foundation</h4><span class="tag tag-green">شغال حالياً</span></div>
+        <p>Next.js 15 + Supabase + RTL + تسجيل برقم الجوال وكلمة السر. الشرط: سجل وادخل والصفحة تطلع عربي RTL.</p>
+      </li>
+      <li class="roadmap-item">
+        <div class="roadmap-row"><h4>Slice 1: Profiles</h4><span class="tag tag-gray">قادم</span></div>
+        <p>استكمال البروفايل مع الصورة الشخصية والمركز والقدم المفضلة. الشرط: بروفايل كامل مع صورة ومحفوظ.</p>
+      </li>
+      <li class="roadmap-item">
+        <div class="roadmap-row"><h4>Slice 2: Teams</h4><span class="tag tag-gray">قادم</span></div>
+        <p>الكابتن ينشئ فريق و 6 لاعبين ينضموا برابط واتساب. الشرط: القائمة تعرض 7 لاعبين.</p>
+      </li>
+      <li class="roadmap-item">
+        <div class="roadmap-row"><h4>Slice 3: Leagues & Payments</h4><span class="tag tag-gray">قادم</span></div>
+        <p>8 فرق مسجلة، الأدمن يأكد الدفعات (كاش/ريفلكت/إيبراق)، وكلها تصير <code>active</code>.</p>
+      </li>
+      <li class="roadmap-item">
+        <div class="roadmap-row"><h4>Slice 4: Fixtures</h4><span class="tag tag-gray">قادم</span></div>
+        <p>توليد جدول المباريات مع تحديد الملعب وموعد الصافرة لكل مباراة.</p>
+      </li>
+      <li class="roadmap-item" style="border-color:#f59e0b">
+        <div class="roadmap-row"><h4>Slice 5: Results & Standings ⭐</h4><span class="tag tag-amber">جوهر المنتج</span></div>
+        <p>إدخال النتيجة، الكابتن الثاني يأكد، الترتيب يرتب حاله فوراً. <strong>هون المنتج بيوجد فعلياً.</strong></p>
+      </li>
+      <li class="roadmap-item">
+        <div class="roadmap-row"><h4>Slice 6: Stats & Player Card</h4><span class="tag tag-gray">قادم</span></div>
+        <p>بطاقة اللاعب (أهداف، صناعات، كروت) بأرقام حقيقية وقابلة للمشاركة.</p>
+      </li>
+      <li class="roadmap-item">
+        <div class="roadmap-row"><h4>Slice 7: Web Push Notifications</h4><span class="tag tag-gray">قادم</span></div>
+        <p>إشعارات التذكير بمواعيد المباريات والنتائج على تلفونات اللاعبين.</p>
+      </li>
+    </ul>
+    <div class="callout callout-accent">Slices 0-5 هم الـ MVP. كل شي بعدهم = الاحتفاظ بالمستخدمين (retention).</div>
+  </section>
+
+  <!-- ── 12. Costs ── -->
+  <section id="s12">
+    <h2>12. التكاليف والاستضافة</h2>
+    <div class="tbl"><table>
+      <thead><tr><th>المرحلة</th><th>شهرياً</th><th>التفاصيل</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Beta (دوري واحد)</strong></td><td><strong style="color:#10b981">$0</strong></td><td>Vercel Hobby + Supabase Free</td></tr>
+        <tr><td><strong>الإطلاق التجاري</strong></td><td><strong>$0–20</strong></td><td>Cloudflare Workers (مجاني تجاري) أو Vercel Pro</td></tr>
+        <tr><td><strong>التوسع (>500MB / >50k)</strong></td><td><strong>+$25</strong></td><td>Supabase Pro</td></tr>
+        <tr><td><strong>SMS OTP حقيقي</strong></td><td><strong>~$5–15</strong></td><td>تفعيل المزود عند وجود إيرادات</td></tr>
+      </tbody>
+    </table></div>
+    <div class="callout">
+      <strong>ملاحظة الاستضافة:</strong> Vercel Hobby بمنع الاستخدام التجاري. التطبيق بيشحن مصاري، فلما نطلق تجارياً بننتقل لـ Cloudflare Workers عبر OpenNext (مجاني تجاري) أو Vercel Pro بـ $20/شهر. لموسم أول بجنين (~80 لاعب) الترافيك لا يذكر على أي منهم.
+    </div>
+  </section>
+
+  <!-- ── 13. Out of Scope ── -->
+  <section id="s13">
+    <h2>13. المستبعدات (ممنوع نبنيها)</h2>
+    <div class="forbidden-grid">
+      <div class="forbidden-item"><strong>بوابة دفع إلكتروني</strong><p>الدفع كاش أو تحويل ريفلكت/إيبراق + تأكيد إداري.</p></div>
+      <div class="forbidden-item"><strong>حجز ملاعب أوتوماتيكي</strong><p>الأدمن بحدد الملعب يدوياً.</p></div>
+      <div class="forbidden-item"><strong>تطبيق أدمن منفصل</strong><p>الأدمن بيدخل من نفس التطبيق بصلاحيات مختلفة.</p></div>
+      <div class="forbidden-item"><strong>نظام خروج المغلوب</strong><p>فقط Round-Robin بالنسخة الأولى.</p></div>
+      <div class="forbidden-item"><strong>سوق انتقالات و ELO</strong><p>لا تقييمات معقدة ولا بيع/شراء لاعبين.</p></div>
+      <div class="forbidden-item"><strong>جدولة بالذكاء الاصطناعي</strong><p>القرعة بخوارزمية رياضية بسيطة.</p></div>
+      <div class="forbidden-item"><strong>لوحة صاحب الملعب</strong><p>مؤجلة لبعد الـ MVP.</p></div>
+      <div class="forbidden-item"><strong>واجهة انجليزية</strong><p>عربي فلسطيني فقط بالنسخة الأولى.</p></div>
+    </div>
+  </section>
+
+  <!-- ── 14. Scenario ── -->
+  <section id="s14">
+    <h2>14. سيناريو عملي حي</h2>
+    <p>رحلة الكابتن أبو خليل من جنين:</p>
+
+    <div class="callout callout-accent">
+      <strong>1. التسجيل —</strong> أبو خليل بفتح التطبيق ع تلفونه، بحط رقمه <code>0599123456</code> وكلمة السر وبسجل.
+    </div>
+    <div class="callout">
+      <strong>2. تأسيس الفريق —</strong> بعمل فريق اسمه "نشامى جنين" وبحمل اللوجو. بطلعله رابط دعوة.
+    </div>
+    <div class="callout">
+      <strong>3. دعوة الشباب —</strong> ببعث الرابط ع جروب الواتساب. فادي ومحمود وسامي وباقي الشباب بضغطوا وبنضموا.
+    </div>
+    <div class="callout">
+      <strong>4. الاشتراك بالدوري —</strong> بختار "دوري جنين للسبعات"، بحول 200 شيكل عبر Reflect، وبيرفع صورة الوصل.
+    </div>
+    <div class="callout">
+      <strong>5. موافقة الأدمن —</strong> المنظم بشوف الوصل بالتطبيق، بضغط "تأكيد". الفريق بصير <code>active</code>. بضغط "توليد الجدول" فبتنزل كل المباريات مع الملاعب والمواعيد.
+    </div>
+    <div class="callout">
+      <strong>6. لعب المباراة —</strong> بعد المباراة أبو خليل بفتح التطبيق وبكتب: فزنا 4-2. بسجل الهدافين: محمود (2)، أبو خليل (1)، سامي (1). الكابتن المنافس بضغط "تأكيد".
+    </div>
+    <div class="callout callout-accent" style="font-weight:600">
+      <strong>7. التحديث الفوري —</strong> بفرشة عين! الترتيب بتتحدث: نشامى جنين ع 3 نقاط بالأول، ومحمود بتصدر قائمة الهدافين. 🎉
+    </div>
+
+    <div class="callout callout-warn" style="margin-top:1.5rem">
+      <strong>سؤال مفتوح:</strong> أسعار الملاعب والحكام الحقيقية بجنين مش معروفة بعد. هي إعدادات الدوري (<code>entry_fee</code>, <code>deposit_amount</code>) مش ثوابت بالكود، فالتنفيذ مش متوقف عليها. الأرقام لازم تتحط قبل ما يفتح دوري حقيقي.
+    </div>
+  </section>
+
+  <footer style="margin-top:4rem;padding:2rem 0;border-top:1px solid #1e293b;text-align:center;color:#475569;font-size:.82rem">
+    دوريات — منصة دوريات الهواة في فلسطين 🇵🇸<br>
+    <span style="color:#334155">مصدر: CLAUDE.md · STACK.md · leaguesapp-design.md · 2026-09-10-foundation.md</span>
+  </footer>
+
+</div>
+
+<script>
+function openToc(){document.getElementById('tocOverlay').classList.add('open')}
+function closeToc(){document.getElementById('tocOverlay').classList.remove('open')}
+
+function gen(){
+  const n=parseInt(document.getElementById('tc').value)||6;
+  const o=document.getElementById('dg');
+  const s=document.getElementById('ds');
+  o.innerHTML='';
+  let t=Array.from({length:n},(_,i)=>`فريق ${i+1}`);
+  if(t.length%2!==0)t.push('__bye__');
+  const sz=t.length,h=sz/2,rc=sz-1;
+  const[fix,...rot]=t;
+  let fx=[];
+  for(let r=0;r<rc;r++){
+    const lu=[fix,...rot];
+    for(let i=0;i<h;i++){
+      const a=lu[i],b=lu[sz-1-i];
+      if(a==='__bye__'||b==='__bye__')continue;
+      fx.push({r:r+1,h:r%2===0?a:b,a:r%2===0?b:a});
+    }
+    rot.unshift(rot.pop());
+  }
+  s.innerText=`${n} فرق · ${fx.length} مباراة · ${rc} جولة`;
+  fx.forEach(f=>{
+    const d=document.createElement('div');
+    d.className='demo-match';
+    d.innerHTML=`<small>جولة ${f.r}</small><span>${f.h} vs ${f.a}</span>`;
+    o.appendChild(d);
+  });
+}
+window.onload=gen;
+</script>
+</body>
+</html>

@@ -1,16 +1,38 @@
-node_modules/
-dist/
-build/
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+/build
+next-env.d.ts
+*.tsbuildinfo
+
+# env
 .env
 .env.*
-*.log
+
+# deploy
+.vercel
+
+# editors / os
 .DS_Store
+*.pem
 .vscode/
 .idea/
+*.log
 
+# project tooling
 .serena/
 graphify-out/
-
-# skills CLI artifacts
 .agents/
 skills-lock.json
+
+# local agent config & vendored skills
+.claude/
+HANDOFF.md
