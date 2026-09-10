@@ -2,6 +2,7 @@
 
 Date: 2026-09-10
 Status: approved for implementation
+Rev 2 (2026-09-10): closed launch gaps — account recovery, dispute/withdrawal handling, roster lock, generated slugs, deposit-activation rule, launch checklist.
 
 ## Purpose
 
@@ -75,11 +76,23 @@ group by league_id, team_id;
 
 ### League roster is separate from team membership
 
-A player can belong to a team without being registered for a given season. `team_members` is the permanent squad; `league_rosters` is the official list for one league. A player may appear in only one roster per league.
+A player can belong to a team without being registered for a given season. `team_members` is the permanent squad; `league_rosters` is the official list for one league. A player may appear in only one roster per league. The captain edits the roster freely while the league is `open`; once it is `active` the roster is locked and only the admin can change it.
 
 ### Payments are records, not transactions
 
-No gateway. The captain transfers by cash, bank, Reflect, or iBuraq, uploads a screenshot, and an admin confirms. `league_teams.status` moves `pending` to `active` only on a confirmed payment. A team that is not `active` does not appear in fixtures.
+No gateway. The captain transfers by cash, bank, Reflect, or iBuraq, uploads a screenshot, and an admin confirms. A team's `league_teams.status` moves `pending` to `active` when its confirmed payments sum to at least `leagues.deposit_amount`. A team that is not `active` does not appear in fixtures. Whether the rest of `entry_fee` is collected up front or in instalments is the admin's arrangement with the captain — the system only tracks the running confirmed total against `entry_fee` and surfaces the shortfall.
+
+### One admin resolves everything by editing
+
+Every dispute, correction, and withdrawal is the admin changing a row. There is no separate arbitration flow: to resolve a disputed result the admin edits `home_score` / `away_score` and sets `admin_confirmed_at`; to accept a reschedule the admin edits `kickoff_at`; to process a withdrawal the admin sets `league_teams.status = withdrawn` and the team's `scheduled` matches to `cancelled` (played matches stay, but the `standings` view already ignores a `cancelled` match, so a half-season withdrawal simply removes that team's results). Reschedule requests and disputes reach the admin as an in-app queue item plus a WhatsApp message; neither needs its own table.
+
+### Account recovery
+
+Phone plus password, no SMS, no transactional email. A locked-out user contacts the admin, who triggers a reset from the admin panel: the app generates a one-time 6-digit code, the admin reads it to the user over the phone or WhatsApp, and the user sets a new password with it. Codes live in `password_resets (profile_id, code_hash, expires_at, used_at)` and expire in 30 minutes. This is enough at ~100 users; a self-service email reset is post-MVP.
+
+### Public slugs
+
+`teams.slug` and `leagues.slug` are generated, not derived from the Arabic name: a 10-character URL-safe nanoid. Shareable links stay ASCII and never collide. The Arabic name is always shown; the slug is only in the URL.
 
 ## Data model
 
@@ -137,6 +150,10 @@ payments        (id, league_id, team_id, amount, currency, method, proof_url,
                  method: cash | bank | reflect | iburaq | other
                  status: pending | confirmed | rejected
 
+-- auth recovery
+password_resets (id, profile_id, code_hash, expires_at, used_at, created_at)
+                 admin-generated 6-digit code, 30-minute expiry
+
 -- notifications
 notifications      (id, profile_id, type, title, body, link, read_at, created_at)
 push_subscriptions (id, profile_id, endpoint, p256dh, auth, created_at)
@@ -155,13 +172,15 @@ Every table carrying league or team context also carries `sport_id`, `city_id`, 
 
 | Table | Read | Write |
 |---|---|---|
-| `leagues`, `matches`, `teams`, `standings` | **anon** — the public league page must work without login | admin |
-| `profiles` | authenticated | self |
-| `team_members`, `league_rosters` | authenticated | team captain |
-| `matches` score fields | anon | either captain, then admin confirms |
-| `payments` | own team captain and admin | captain creates `pending`; only admin confirms |
+| `leagues`, `matches`, `teams`, `standings`, `player_stats`, `sports`, `cities`, `venues` | **anon** — the public league page must work without login | admin |
+| `profiles` | authenticated | self (admin may edit any) |
+| `team_members` | authenticated | team captain |
+| `league_rosters` | authenticated | team captain while league is `open`; admin always |
+| `matches` score fields | anon | either captain while `scheduled` / `awaiting`; admin always |
+| `payments` | own team captain and admin | captain creates `pending`; only admin confirms or rejects |
+| `password_resets`, `wa_sends`, `notifications`, `push_subscriptions` | none (server-only) | none (server-only, via the service role in Server Actions) |
 
-Anonymous read on leagues, matches, teams, and standings is a product requirement, not an oversight: the shareable public league page is the growth loop, and a login wall kills it.
+Anonymous read on the public tables is a product requirement, not an oversight: the shareable public league page is the growth loop, and a login wall kills it. `is_admin()` is a `security definer` helper reading `profiles.role`; every admin-write policy calls it.
 
 ## Result confirmation flow
 
@@ -214,9 +233,25 @@ Slices 0 to 5 are the MVP. Everything after is retention.
 
 `generateFixtures` comes before slice 0 because it is the only real algorithm in the product and it needs no database, no UI, and no framework. It is the cheapest thing to build and the most expensive thing to discover broken in slice 4.
 
+## Match venue and time
+
+All matches are at neutral rented pitches. `home_team_id` / `away_team_id` are only a fixture-table label and first-listed ordering — there is no home advantage and no home venue. The admin assigns `venue_id` and `kickoff_at` per match after fixtures are generated; slice 4's scheduling screen is the heaviest admin surface because it sets ~28 rows.
+
+## Launch checklist (operational, not a slice)
+
+Before a real league opens, the admin does this once, in order — captured in `docs/LAUNCH.md` during slice 3:
+
+1. Register normally, then an existing admin (or a one-off SQL update for the very first) sets `profiles.role = 'admin'`.
+2. Enter the real venues for the city with their `price_per_slot`.
+3. Create the league: `entry_fee`, `deposit_amount`, `teams_max`, `rounds`, `starts_on`, all from real Jenin numbers.
+4. Set the league `status = 'open'` so captains can register.
+5. Warm the WhatsApp SIM for a week (slice 7 only).
+6. Keep league money in a separate bank account. Never spend deposits before the season ends.
+7. Publish a short Arabic terms + privacy page (name, phone, and payment records are stored; no card data).
+
 ## Out of scope
 
-Payment gateway, automated venue booking, live match mode, ELO rating, transfer market, knockout tournaments, AI scheduling, venue-owner dashboard, a separate admin application, multi-sport UI branching, English locale.
+Payment gateway, automated venue booking, live match mode, ELO rating, transfer market, knockout tournaments, AI scheduling, venue-owner dashboard, a separate admin application, multi-sport UI branching, English locale, self-service password reset.
 
 ## Open question
 
