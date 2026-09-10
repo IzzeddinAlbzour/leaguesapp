@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
 import { register, type AuthState } from '@/app/actions/auth';
+import { Button } from '@/components/ui/button';
+import { Field } from '@/components/ui/field';
 
 const initial: AuthState = { error: null };
 
@@ -12,62 +14,48 @@ export default function RegisterPage() {
   const [state, action, pending] = useActionState(register, initial);
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-6 p-6">
-      <h1 className="text-2xl font-bold">{t('registerTitle')}</h1>
+    <div className="flex flex-col gap-6">
+      <h1 className="text-xl font-semibold">{t('registerTitle')}</h1>
 
       <form action={action} className="flex flex-col gap-4">
-        <label className="flex flex-col gap-1">
-          <span className="text-sm text-text-dim">{t('fullName')}</span>
-          <input
-            name="fullName"
-            required
-            className="rounded-lg border border-border bg-surface px-3 py-2"
-          />
-        </label>
-
-        <label className="flex flex-col gap-1">
-          <span className="text-sm text-text-dim">{t('phone')}</span>
-          <input
-            name="phone"
-            type="tel"
-            inputMode="numeric"
-            dir="ltr"
-            required
-            placeholder={t('phonePlaceholder')}
-            className="rounded-lg border border-border bg-surface px-3 py-2 text-start"
-          />
-        </label>
-
-        <label className="flex flex-col gap-1">
-          <span className="text-sm text-text-dim">{t('password')}</span>
-          <input
-            name="password"
-            type="password"
-            required
-            minLength={8}
-            className="rounded-lg border border-border bg-surface px-3 py-2"
-          />
-        </label>
+        <Field label={t('fullName')} name="fullName" required autoComplete="name" />
+        <Field
+          label={t('phone')}
+          name="phone"
+          type="tel"
+          inputMode="numeric"
+          dir="ltr"
+          required
+          autoComplete="tel"
+          placeholder={t('phonePlaceholder')}
+          className="text-start tabular"
+        />
+        <Field
+          label={t('password')}
+          name="password"
+          type="password"
+          required
+          minLength={8}
+          autoComplete="new-password"
+        />
 
         {state.error && (
-          <p className="text-sm text-rose">{t(state.error)}</p>
+          <p role="alert" className="text-sm text-rose">
+            {t(state.error)}
+          </p>
         )}
 
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-lg bg-accent px-4 py-2 font-medium text-canvas disabled:opacity-50"
-        >
-          {t('registerSubmit')}
-        </button>
+        <Button type="submit" disabled={pending} className="mt-1">
+          {t(pending ? 'registerPending' : 'registerSubmit')}
+        </Button>
       </form>
 
       <p className="text-sm text-text-dim">
         {t('haveAccount')}{' '}
-        <Link href="/login" className="text-accent underline">
+        <Link href="/login" className="font-medium text-accent">
           {t('loginTitle')}
         </Link>
       </p>
-    </main>
+    </div>
   );
 }
