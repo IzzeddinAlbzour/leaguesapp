@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
+import { formatDay, formatTime } from '@/lib/datetime';
 
 type Fixture = {
   id: string;
@@ -11,19 +12,8 @@ type Fixture = {
   home_team: { name: string; slug: string } | null;
   away_team: { name: string; slug: string } | null;
   venue: { name: string } | null;
+  venue_confirmation_status: string | null;
 };
-
-const dayFormatter = new Intl.DateTimeFormat('ar', {
-  weekday: 'long',
-  day: 'numeric',
-  month: 'long',
-  numberingSystem: 'latn', // Western digits — never Arabic-Indic
-});
-const timeFormatter = new Intl.DateTimeFormat('ar', {
-  hour: 'numeric',
-  minute: '2-digit',
-  numberingSystem: 'latn',
-});
 
 export async function FixturesList({ fixtures, leagueSlug }: { fixtures: Fixture[]; leagueSlug: string }) {
   const t = await getTranslations('fixtures');
@@ -68,13 +58,17 @@ export async function FixturesList({ fixtures, leagueSlug }: { fixtures: Fixture
                   <div className="flex shrink-0 flex-col items-end gap-0.5 text-end text-xs text-text-dim">
                     {m.kickoff_at ? (
                       <>
-                        <span>{dayFormatter.format(new Date(m.kickoff_at))}</span>
-                        <span className="tabular">{timeFormatter.format(new Date(m.kickoff_at))}</span>
+                        <span>{formatDay(m.kickoff_at)}</span>
+                        <span className="tabular">{formatTime(m.kickoff_at)}</span>
                       </>
                     ) : (
                       <span>{t('dateTbd')}</span>
                     )}
-                    {m.venue && <span>{m.venue.name}</span>}
+                    {/* Only a confirmed booking is public. Pending and rejected
+                        both read as "no venue yet" — same as an unassigned
+                        match — so the page never advertises a venue that has
+                        not agreed, or has explicitly refused. */}
+                    {m.venue && m.venue_confirmation_status === 'confirmed' && <span>{m.venue.name}</span>}
                   </div>
                 </li>
               );

@@ -30,7 +30,7 @@ export async function getTeamsInLeague(leagueId: string) {
 }
 
 const FIXTURES_SELECT =
-  'id, round, status, home_score, away_score, kickoff_at, ' +
+  'id, round, status, home_score, away_score, kickoff_at, venue_confirmation_status, ' +
   'home_team:teams!matches_home_team_id_fkey(id, name, slug), ' +
   'away_team:teams!matches_away_team_id_fkey(id, name, slug), ' +
   'venue:venues(name)';
@@ -52,6 +52,9 @@ export async function getFixtures(leagueId: string) {
     home_team: { id: string; name: string; slug: string } | null;
     away_team: { id: string; name: string; slug: string } | null;
     venue: { name: string } | null;
+    // A venue is only public once its owner confirms — the match keeps its
+    // venue_id through a rejection so the admin can see who said no.
+    venue_confirmation_status: string | null;
   }>;
 }
 

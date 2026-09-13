@@ -83,7 +83,8 @@
     },
     "schedule": {
       "titleSuffix": "الجدول والنتائج",
-      "unassignedWarning": "{count} مباراة بدون ملعب أو موعد",
+      "unassignedWarning": "{count} مباراة بدون ملعب أو موعد أو مرفوضة من الملعب",
+      "venueRejected": "مرفوض",
       "noFixtures": "لسا ما تولد جدول المباريات.",
       "roundPrefix": "ج",
       "edit": "تعديل",
@@ -123,6 +124,61 @@
         "admin": "إدارة",
         "venue_owner": "صاحب ملعب"
       }
+    },
+    "venues": {
+      "title": "الملاعب",
+      "newVenue": "ملعب جديد",
+      "empty": "ما في ملاعب لسا.",
+      "nameLabel": "اسم الملعب",
+      "namePlaceholder": "ملعب جنين الرياضي",
+      "cityLabel": "المدينة",
+      "feeLabel": "أجرة المباراة",
+      "submit": "إضافة الملعب",
+      "noOwner": "بلا صاحب ملعب",
+      "assignOwnerTitle": "ربط صاحب الملعب",
+      "phoneLabel": "رقم الهاتف",
+      "phonePlaceholder": "0599123456",
+      "passwordLabel": "كلمة السر",
+      "fullNameLabel": "الاسم",
+      "assignSubmit": "إنشاء الحساب وربطه بالملعب",
+      "ownerAssigned": "صاحب الملعب مربوط"
+    }
+  },
+  "venue": {
+    "dashboard": "لوحة الملعب",
+    "publicSite": "الموقع العام",
+    "nav": {
+      "bookings": "الحجوزات",
+      "availability": "الأوقات المتاحة",
+      "info": "معلومات الملعب"
+    },
+    "home": {
+      "pendingCount": "حجوزات بانتظار الموافقة: {count}",
+      "upcomingCount": "مباريات مؤكدة قادمة: {count}",
+      "revenue": "الإيراد الحالي: {amount} {currency}"
+    },
+    "bookings": {
+      "title": "الحجوزات",
+      "empty": "ما في حجوزات لسا.",
+      "pending": "بانتظار الموافقة",
+      "confirmed": "مؤكد",
+      "rejected": "مرفوض",
+      "confirm": "موافقة",
+      "reject": "رفض"
+    },
+    "availability": {
+      "title": "الأوقات المتاحة",
+      "dateLabel": "التاريخ",
+      "startLabel": "من",
+      "endLabel": "إلى",
+      "submit": "إضافة وقت",
+      "remove": "حذف",
+      "empty": "ما في أوقات مضافة."
+    },
+    "info": {
+      "title": "معلومات الملعب",
+      "nameLabel": "اسم الملعب",
+      "submit": "حفظ"
     }
   },
   "league": {

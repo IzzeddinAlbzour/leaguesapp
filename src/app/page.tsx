@@ -91,6 +91,11 @@ export default async function Home() {
             {t('admin.dashboard')}
           </Link>
         )}
+        {profile?.role === 'venue_owner' && (
+          <Link href="/venue" className={buttonClasses('gold')}>
+            {t('venue.dashboard')}
+          </Link>
+        )}
       </nav>
 
       <form action={logout}>

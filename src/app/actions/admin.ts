@@ -5,6 +5,8 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { generateSlug } from '@/lib/slug';
 import { generateFixtures as computeFixtures } from '@/lib/fixtures';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { normalizePhone, phoneToAuthEmail } from '@/lib/phone';
 
 async function requireAdmin() {
   const supabase = await createClient();
@@ -184,7 +186,12 @@ export async function setMatchSchedule(matchId: string, formData: FormData) {
 
   const { data: match } = await supabase
     .from('matches')
-    .update({ venue_id: venueId, kickoff_at: kickoffAt })
+    .update({
+      venue_id: venueId,
+      kickoff_at: kickoffAt,
+      // Assigning a venue reopens confirmation; clearing it clears the flag too.
+      venue_confirmation_status: venueId ? 'pending' : null,
+    })
     .eq('id', matchId)
     .select('league_id')
     .single();
@@ -244,4 +251,43 @@ export async function enterResult(matchId: string, formData: FormData) {
   revalidatePath(`/admin/leagues/${match.league_id}`);
   revalidatePath(`/admin/matches/${matchId}`);
   redirect(`/admin/leagues/${match.league_id}/schedule`);
+}
+
+export async function createVenue(formData: FormData) {
+  const supabase = await requireAdmin();
+
+  const name = String(formData.get('name') ?? '').trim();
+  const cityId = String(formData.get('city_id') ?? '');
+  const feePerMatch = Number(formData.get('fee_per_match') ?? 0);
+  if (!name || !cityId) return;
+
+  await supabase.from('venues').insert({ name, city_id: cityId, fee_per_match: feePerMatch });
+  revalidatePath('/admin/venues');
+  redirect('/admin/venues');
+}
+
+// Admin-only account creation, same service-role pattern as register() in
+// actions/auth.ts — the difference is the admin sets the role and links the
+// venue afterward, since the signup trigger always defaults role to 'player'.
+export async function createVenueOwner(venueId: string, formData: FormData) {
+  const supabase = await requireAdmin();
+
+  const phone = normalizePhone(String(formData.get('phone') ?? ''));
+  const password = String(formData.get('password') ?? '');
+  const fullName = String(formData.get('full_name') ?? '').trim();
+  if (!phone || password.length < 8) return;
+
+  const admin = createAdminClient();
+  const { data: created, error } = await admin.auth.admin.createUser({
+    email: phoneToAuthEmail(phone),
+    password,
+    email_confirm: true,
+    user_metadata: { phone, full_name: fullName || null },
+  });
+  if (error || !created.user) return;
+
+  await admin.from('profiles').update({ role: 'venue_owner' }).eq('id', created.user.id);
+  await supabase.from('venues').update({ owner_id: created.user.id }).eq('id', venueId);
+
+  revalidatePath(`/admin/venues/${venueId}`);
 }
