@@ -23,6 +23,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           {t('dashboard')}
         </Link>
         <nav className="flex items-center gap-4 text-sm text-text-dim">
+          <Link href="/admin/venues" className="hover:text-text">
+            {t('venues.title')}
+          </Link>
           <Link href="/admin/members" className="hover:text-text">
             {t('members.title')}
           </Link>

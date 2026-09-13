@@ -123,6 +123,24 @@
         "admin": "إدارة",
         "venue_owner": "صاحب ملعب"
       }
+    },
+    "venues": {
+      "title": "الملاعب",
+      "newVenue": "ملعب جديد",
+      "empty": "ما في ملاعب لسا.",
+      "nameLabel": "اسم الملعب",
+      "namePlaceholder": "ملعب جنين الرياضي",
+      "cityLabel": "المدينة",
+      "feeLabel": "أجرة المباراة (شيكل)",
+      "submit": "إضافة الملعب",
+      "noOwner": "بلا صاحب ملعب",
+      "assignOwnerTitle": "ربط صاحب الملعب",
+      "phoneLabel": "رقم الهاتف",
+      "phonePlaceholder": "0599123456",
+      "passwordLabel": "كلمة السر",
+      "fullNameLabel": "الاسم",
+      "assignSubmit": "إنشاء الحساب وربطه بالملعب",
+      "ownerAssigned": "صاحب الملعب مربوط"
     }
   },
   "league": {
