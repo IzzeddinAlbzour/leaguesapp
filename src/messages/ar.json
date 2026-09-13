@@ -143,6 +143,43 @@
       "ownerAssigned": "صاحب الملعب مربوط"
     }
   },
+  "venue": {
+    "dashboard": "لوحة الملعب",
+    "publicSite": "الموقع العام",
+    "nav": {
+      "bookings": "الحجوزات",
+      "availability": "الأوقات المتاحة",
+      "info": "معلومات الملعب"
+    },
+    "home": {
+      "pendingCount": "حجوزات بانتظار الموافقة: {count}",
+      "upcomingCount": "مباريات مؤكدة قادمة: {count}",
+      "revenue": "الإيراد الحالي: {amount} شيكل"
+    },
+    "bookings": {
+      "title": "الحجوزات",
+      "empty": "ما في حجوزات لسا.",
+      "pending": "بانتظار الموافقة",
+      "confirmed": "مؤكد",
+      "rejected": "مرفوض",
+      "confirm": "موافقة",
+      "reject": "رفض"
+    },
+    "availability": {
+      "title": "الأوقات المتاحة",
+      "dateLabel": "التاريخ",
+      "startLabel": "من",
+      "endLabel": "إلى",
+      "submit": "إضافة وقت",
+      "remove": "حذف",
+      "empty": "ما في أوقات مضافة."
+    },
+    "info": {
+      "title": "معلومات الملعب",
+      "nameLabel": "اسم الملعب",
+      "submit": "حفظ"
+    }
+  },
   "league": {
     "tabFixtures": "المباريات",
     "tabStandings": "الترتيب",
