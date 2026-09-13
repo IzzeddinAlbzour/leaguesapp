@@ -11,10 +11,13 @@ in sync with it.
    ```
 2. **Enter real venues** for the city, with their `price_per_slot`, from
    `/admin` → a league's setup page.
-3. **Create the league** — `entry_fee`, `deposit_amount` (deposit tracking is
-   deferred in the current lean schema; see note below), `teams_max`,
-   `rounds`, `starts_on` — with real numbers for the city being launched.
-4. **Set the league `status = 'open'`** so captains can register their teams.
+3. **Create the league** — `entry_fee`, `deposit_amount`, `rounds` — with real
+   numbers for the city being launched. (`teams_max` and `starts_on` are not
+   yet fields on `leagues`; the admin manages the team count and kickoff
+   date operationally.)
+4. **Set the league `status = 'open'`** so captains can register their own
+   team from `/team/new` and register it into the league from `/team`, or
+   the admin can still add a team by hand from the league's admin page.
 5. **Warm the WhatsApp SIM for a week** — slice 7 only, not required for the
    MVP launch.
 6. **Keep league money in a separate bank account.** Never spend deposits
@@ -23,16 +26,32 @@ in sync with it.
    registration. It already states what's stored (name, phone, payment
    records; no card data).
 
-## Known deviations from the full spec (accepted for the lean MVP)
+## What's self-serve now
 
-- **Payments** are a single `league_teams.paid` boolean, confirmed by the
-  admin per team — not a running ledger against `entry_fee` /
-  `deposit_amount`. Good enough at league-launch scale; revisit if a league
-  needs partial/instalment tracking.
+- **Captains** create their own team (`/team/new`), get a shareable invite
+  link, and register it into any `open` league — no admin data entry
+  required. The admin can still add a team by hand for a captain without an
+  account.
+- **Players** join a team from its invite link (`/join/[token]`) once they
+  have an account; no separate roster-request flow.
+- **Payments** are real records (`payments` table — amount, method, date,
+  note) against `entry_fee`/`deposit_amount`, cash/bank-transfer/Reflect/
+  iBuraq only, admin-confirmed from the league setup page. `league_teams.paid`
+  auto-flips once the running total clears the deposit (or the full entry
+  fee when no deposit is set) — **still no payment gateway, by design.**
+- **Password reset** is admin-mediated end to end: `/admin/members` →
+  generate a 6-digit code → read it to the user → they redeem it at
+  `/reset-password`.
+- **Player card** (`/p/[id]`, `/p/me`) — goals and assists, shareable.
+
+## Known deviations from the full spec (still accepted for this MVP)
+
 - **Result entry is admin-only.** There is no captain self-report + opponent
   confirmation handshake. The admin enters `home_score` / `away_score` and
   goal scorers directly from `/admin/matches/[id]`.
 - **Notifications (slice 7)** are not built. No WhatsApp messages fire yet.
+- No authenticated top bar / bottom nav shell yet — logged-in navigation is
+  a link list on `/`.
 
 ## Before opening a league
 

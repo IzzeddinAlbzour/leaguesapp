@@ -50,7 +50,7 @@ export default async function SchedulePage({ params }: { params: Promise<{ id: s
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <h1 className="text-lg font-semibold">{league.name} — {t('titleSuffix')}</h1>
+        <h1 className="display text-2xl">{league.name} — {t('titleSuffix')}</h1>
         {unassigned > 0 && (
           <p className="mt-1 text-sm text-amber">{t('unassignedWarning', { count: unassigned })}</p>
         )}

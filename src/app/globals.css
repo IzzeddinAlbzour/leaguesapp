@@ -1,32 +1,36 @@
 @import "tailwindcss";
 
-/* Design authority: DESIGN.md — dark-first, emerald, Palestinian RTL. */
+/* Design authority: DESIGN.md — Floodlight. Matchday-night, Palestinian RTL. */
 :root {
-  --canvas: #070b12;
-  --surface: #0f172a;
-  --surface-2: #131c31;
-  --border: #1e293b;
-  --border-strong: #2b3a52;
-  --text: #e8ecf3;
-  --text-dim: #9fb0c5;
-  --accent: #10b981;
-  --accent-ink: #04140d;
-  --amber: #f59e0b;
-  --rose: #fb7185;
-  --radius: 0.7rem;
+  --canvas: #05070a;
+  --surface: #111822;
+  --surface-2: #182130;
+  --border: #232c3a;
+  --border-strong: #3a465c;
+  --text: #f4f7fb;
+  --text-dim: #93a1b8;
+
+  --pitch: #22e08a;
+  --pitch-ink: #03170d;
+  --gold: #ffb020;
+  --gold-ink: #241300;
+  --amber: #f5a524;
+  --rose: #ff5a72;
+
+  --radius: 0.85rem;
   --tap: 2.75rem; /* 44px minimum touch target */
 
-  /* Match/table semantics — win/draw/loss, paid/unpaid. Distinguishable
+  /* Match/table semantics — win/draw/loss, paid/owed. Distinguishable
      without reading: the standings table and a team's form rely on colour
-     alone at a glance. */
-  --win: #10b981;    /* = accent, a win is the positive outcome */
-  --win-ink: #04140d;
-  --draw: #9fb0c5;    /* = text-dim, a draw is neither */
+     alone at a glance. A payment owed is a gold fact, never a warning. */
+  --win: #22e08a;      /* = pitch */
+  --win-ink: #03170d;
+  --draw: #93a1b8;      /* = text-dim */
   --draw-ink: #0b1220;
-  --loss: #fb7185;    /* = rose */
+  --loss: #ff5a72;      /* = rose */
   --loss-ink: #2a0a0e;
-  --paid: #10b981;
-  --unpaid: #f59e0b;
+  --paid: #22e08a;      /* = pitch */
+  --owed: #ffb020;       /* = gold */
 }
 
 @theme inline {
@@ -37,8 +41,10 @@
   --color-border-strong: var(--border-strong);
   --color-text: var(--text);
   --color-text-dim: var(--text-dim);
-  --color-accent: var(--accent);
-  --color-accent-ink: var(--accent-ink);
+  --color-accent: var(--pitch);
+  --color-accent-ink: var(--pitch-ink);
+  --color-gold: var(--gold);
+  --color-gold-ink: var(--gold-ink);
   --color-amber: var(--amber);
   --color-rose: var(--rose);
   --color-win: var(--win);
@@ -48,7 +54,7 @@
   --color-loss: var(--loss);
   --color-loss-ink: var(--loss-ink);
   --color-paid: var(--paid);
-  --color-unpaid: var(--unpaid);
+  --color-owed: var(--owed);
   --radius-app: var(--radius);
   --font-sans: var(--font-arabic), system-ui, sans-serif;
 }
@@ -59,15 +65,64 @@ html {
 }
 
 body {
-  background: var(--canvas);
+  background:
+    radial-gradient(ellipse 1200px 700px at 50% -10%, color-mix(in oklab, var(--pitch) 8%, transparent), transparent 60%),
+    var(--canvas);
   color: var(--text);
   font-family: var(--font-arabic), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
+  position: relative;
+}
+
+/* Floodlight grain — a near-invisible noise layer so the canvas never reads
+   as flat black. Decorative, behind content, never intercepts input. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* The scoreboard-dot device: a small clipped-corner marker inline before a
+   section heading's own text — reads as a scoreboard bullet, not a card
+   border. (A left/right accent bar on the element itself was tried first
+   and flagged by the design detector as the generic AI side-tab tell; this
+   replaces it rather than softening it.) */
+.stripe-heading {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.stripe-heading::before {
+  content: "";
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--pitch);
+  clip-path: polygon(3px 0, 100% 0, 100% calc(100% - 3px), calc(100% - 3px) 100%, 0 100%, 0 3px);
+  flex-shrink: 0;
+}
+
+/* Scoreboard display type: existing 700 weight, pushed to display scale
+   with tight tracking — the "second face" that never risks a font load. */
+.display {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Browser surfaces carry the design too. */
 ::selection {
-  background: color-mix(in oklab, var(--accent) 30%, transparent);
+  background: color-mix(in oklab, var(--pitch) 32%, transparent);
   color: var(--text);
 }
 
@@ -77,13 +132,13 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--pitch);
   outline-offset: 2px;
   border-radius: 4px;
 }
 
 * {
-  caret-color: var(--accent);
+  caret-color: var(--pitch);
 }
 
 * {
@@ -104,4 +159,9 @@ body {
 /* Figures align in tables, standings, scores. */
 .tabular {
   font-variant-numeric: tabular-nums;
+}
+
+/* Scoreboard chip — clipped corner, never on a form control. */
+.clip-tag {
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
 }

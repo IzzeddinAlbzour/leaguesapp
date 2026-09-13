@@ -27,7 +27,9 @@
     "errorShortPassword": "كلمة السر لازم 8 حروف على الأقل",
     "errorBadCredentials": "رقم الهاتف أو كلمة السر غلط",
     "errorPhoneTaken": "هاد الرقم مسجّل من قبل",
-    "errorGeneric": "صار خطأ، جرّب كمان مرة"
+    "errorGeneric": "صار خطأ، جرّب كمان مرة",
+    "errorResetBadCode": "الكود غلط أو منتهي",
+    "forgotPassword": "نسيت كلمة السر؟"
   },
   "admin": {
     "dashboard": "لوحة التحكم",
@@ -55,6 +57,7 @@
       "roundsOnce": "ذهاب فقط",
       "roundsTwice": "ذهاب وإياب",
       "feeLabel": "رسم الاشتراك (شيكل)",
+      "depositLabel": "الوديعة المطلوبة (شيكل، اختياري)",
       "submit": "إنشاء الدوري"
     },
     "leagueSetup": {
@@ -91,6 +94,35 @@
     "result": {
       "save": "حفظ النتيجة",
       "noPlayers": "ما في لاعبين"
+    },
+    "payments": {
+      "title": "الدفعات",
+      "amountLabel": "المبلغ (شيكل)",
+      "methodLabel": "طريقة الدفع",
+      "methods": {
+        "cash": "كاش",
+        "bank_transfer": "تحويل بنكي",
+        "reflect": "Reflect",
+        "iburaq": "iBuraq"
+      },
+      "noteLabel": "ملاحظة (اختياري)",
+      "add": "تسجيل دفعة",
+      "totalPaid": "إجمالي المدفوع",
+      "depositLabel": "الوديعة المطلوبة",
+      "empty": "ما في دفعات مسجلة لسا."
+    },
+    "members": {
+      "title": "الأعضاء",
+      "searchPlaceholder": "دور برقم الهاتف أو الاسم",
+      "resetTrigger": "إعادة تعيين كلمة السر",
+      "codeGenerated": "الكود:",
+      "codeHint": "اقرأ هاد الكود للمستخدم. صالح لمدة 30 دقيقة.",
+      "noResults": "ما في نتائج",
+      "role": {
+        "player": "لاعب",
+        "admin": "إدارة",
+        "venue_owner": "صاحب ملعب"
+      }
     }
   },
   "league": {
@@ -138,5 +170,81 @@
     "rightsBody": "إلك الحق تطلب حذف حسابك وبياناتك بالتواصل مع الإدارة. سجلات الدفعات المرتبطة بدوري منتهي بتنحفظ لأغراض محاسبية.",
     "contactTitle": "تواصل",
     "contactBody": "أي سؤال أو طلب يخص بياناتك، تواصل مع إدارة الدوري مباشرة."
+  },
+  "profile": {
+    "title": "الملف الشخصي",
+    "fullName": "الاسم الكامل",
+    "city": "المدينة",
+    "birthDate": "تاريخ الميلاد",
+    "position": "المركز المفضل",
+    "positions": {
+      "gk": "حارس مرمى",
+      "def": "مدافع",
+      "mid": "وسط",
+      "fwd": "مهاجم"
+    },
+    "foot": "القدم المفضلة",
+    "feet": {
+      "right": "يمين",
+      "left": "شمال",
+      "both": "الاثنين"
+    },
+    "rating": "تقييمك لنفسك (١-٥)",
+    "save": "حفظ التعديلات",
+    "unset": "غير محدد",
+    "myCard": "بطاقتي ↗"
+  },
+  "myTeam": {
+    "title": "فريقي",
+    "noTeam": "ما عندك فريق لسا.",
+    "createCta": "أنشئ فريق",
+    "captainBadge": "الكابتن",
+    "playerBadge": "لاعب",
+    "inviteTitle": "رابط الدعوة",
+    "inviteHint": "شارك هاد الرابط مع لاعبينك حتى ينضموا.",
+    "copy": "نسخ الرابط",
+    "copied": "انسخ!",
+    "rosterTitle": "التشكيلة",
+    "addPlayerPlaceholder": "اسم لاعب",
+    "addPlayer": "إضافة",
+    "remove": "حذف",
+    "leaguesTitle": "الدوريات المفتوحة",
+    "registerCta": "سجل بهاد الدوري",
+    "registeredBadge": "مسجل",
+    "paidBadge": "مدفوع",
+    "owedBadge": "لسا ما دفعت",
+    "noOpenLeagues": "ما في دوريات مفتوحة للتسجيل هلأ.",
+    "myLeaguesTitle": "دورياتي"
+  },
+  "newTeam": {
+    "title": "فريق جديد",
+    "nameLabel": "اسم الفريق",
+    "namePlaceholder": "شباب الحي",
+    "cityLabel": "المدينة",
+    "submit": "إنشاء الفريق"
+  },
+  "join": {
+    "title": "انضمام لفريق",
+    "teamLabel": "بتنضم لفريق",
+    "nameLabel": "اسمك بالتشكيلة",
+    "submit": "انضم",
+    "success": "انضممت للفريق!",
+    "goToTeam": "روح لصفحة الفريق ←",
+    "invalid": "رابط الدعوة مش صحيح."
+  },
+  "playerCard": {
+    "goals": "أهداف",
+    "assists": "تمريرات حاسمة",
+    "team": "الفريق",
+    "notFound": "ما في بطاقة بهاد الرابط."
+  },
+  "resetPassword": {
+    "title": "استرجاع كلمة السر",
+    "hint": "احصل على كود من الإدارة، وحطه هون مع كلمة سر جديدة.",
+    "code": "الكود المكون من ٦ أرقام",
+    "newPassword": "كلمة السر الجديدة",
+    "submit": "تعيين كلمة السر",
+    "success": "تم تغيير كلمة السر! سجل دخولك.",
+    "goToLogin": "تسجيل الدخول"
   }
 }

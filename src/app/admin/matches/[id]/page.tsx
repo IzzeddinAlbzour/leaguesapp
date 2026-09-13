@@ -40,7 +40,7 @@ export default async function ResultEntryPage({ params }: { params: Promise<{ id
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-lg font-semibold">
+      <h1 className="display text-2xl">
         {match.home_team.name} × {match.away_team.name}
       </h1>
 

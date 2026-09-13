@@ -44,14 +44,14 @@ export default async function TeamPage({
       </Link>
 
       <header className="flex flex-col gap-1">
-        <h1 className="text-xl font-bold">{team.name}</h1>
+        <h1 className="display text-2xl">{team.name}</h1>
         {team.captain_name && (
           <p className="text-sm text-text-dim">{t('captainPrefix')} {team.captain_name}</p>
         )}
       </header>
 
       <section>
-        <h2 className="mb-2 text-sm font-medium text-text-dim">{t('rosterTitle')}</h2>
+        <h2 className="stripe-heading mb-2 text-sm font-medium text-text-dim">{t('rosterTitle')}</h2>
         {players.length === 0 ? (
           <p className="text-sm text-text-dim">{t('noPlayers')}</p>
         ) : (
@@ -69,7 +69,7 @@ export default async function TeamPage({
       </section>
 
       <section>
-        <h2 className="mb-2 text-sm font-medium text-text-dim">{t('matchesTitle')}</h2>
+        <h2 className="stripe-heading mb-2 text-sm font-medium text-text-dim">{t('matchesTitle')}</h2>
         {!matches || matches.length === 0 ? (
           <p className="text-sm text-text-dim">{t('noMatches')}</p>
         ) : (

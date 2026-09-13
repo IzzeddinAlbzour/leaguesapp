@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { buttonClasses } from '@/components/ui/button';
+import { ScoreboardTag } from '@/components/ui/scoreboard-tag';
 
 export default async function AdminHome() {
   const t = await getTranslations('admin');
@@ -14,7 +15,7 @@ export default async function AdminHome() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold">{t('home.title')}</h1>
+        <h1 className="display text-2xl">{t('home.title')}</h1>
         <Link href="/admin/leagues/new" className={buttonClasses('accent')}>
           {t('home.newLeague')}
         </Link>
@@ -45,6 +46,6 @@ export default async function AdminHome() {
 }
 
 function StatusBadge({ status, labels }: { status: string; labels: Record<string, string> }) {
-  const tone = status === 'active' ? 'text-accent' : status === 'finished' ? 'text-text-dim' : 'text-amber';
-  return <span className={`text-xs font-medium ${tone}`}>{labels[status] ?? status}</span>;
+  const tone = status === 'active' ? 'pitch' : status === 'finished' ? 'dim' : status === 'open' ? 'gold' : 'amber';
+  return <ScoreboardTag tone={tone}>{labels[status] ?? status}</ScoreboardTag>;
 }

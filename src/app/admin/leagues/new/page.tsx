@@ -11,7 +11,7 @@ export default async function NewLeaguePage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-lg font-semibold">{t('title')}</h1>
+      <h1 className="display text-2xl">{t('title')}</h1>
 
       <form action={createLeague} className="flex flex-col gap-4">
         <Field label={t('nameLabel')} name="name" required placeholder={t('namePlaceholder')} />
@@ -47,6 +47,15 @@ export default async function NewLeaguePage() {
         <Field
           label={t('feeLabel')}
           name="entry_fee"
+          type="number"
+          inputMode="decimal"
+          dir="ltr"
+          className="text-start tabular"
+        />
+
+        <Field
+          label={t('depositLabel')}
+          name="deposit_amount"
           type="number"
           inputMode="decimal"
           dir="ltr"

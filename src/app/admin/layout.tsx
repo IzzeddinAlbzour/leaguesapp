@@ -19,12 +19,17 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="mx-auto min-h-dvh w-full max-w-2xl px-4 pb-10">
       <header className="flex items-center justify-between border-b border-border py-4">
-        <Link href="/admin" className="font-bold text-accent">
+        <Link href="/admin" className="display text-xl text-accent">
           {t('dashboard')}
         </Link>
-        <Link href="/" className="text-sm text-text-dim">
-          {t('publicSite')}
-        </Link>
+        <nav className="flex items-center gap-4 text-sm text-text-dim">
+          <Link href="/admin/members" className="hover:text-text">
+            {t('members.title')}
+          </Link>
+          <Link href="/" className="hover:text-text">
+            {t('publicSite')}
+          </Link>
+        </nav>
       </header>
       <div className="pt-5">{children}</div>
     </div>

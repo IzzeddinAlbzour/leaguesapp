@@ -14,8 +14,8 @@ export function Field({
       <input
         className={
           'min-h-[var(--tap)] rounded-app border border-border bg-surface px-3 text-text ' +
-          'transition-colors placeholder:text-text-dim hover:border-border-strong ' +
-          `focus:border-accent ${className}`
+          'transition-[border-color,box-shadow] placeholder:text-text-dim hover:border-border-strong ' +
+          `focus:border-accent focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--pitch)_18%,transparent)] ${className}`
         }
         {...props}
       />

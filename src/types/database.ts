@@ -7,6 +7,8 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
@@ -77,6 +79,7 @@ export type Database = {
           city_id: string
           created_at: string
           currency: string
+          deposit_amount: number | null
           entry_fee: number | null
           id: string
           name: string
@@ -90,6 +93,7 @@ export type Database = {
           city_id: string
           created_at?: string
           currency?: string
+          deposit_amount?: number | null
           entry_fee?: number | null
           id?: string
           name: string
@@ -103,6 +107,7 @@ export type Database = {
           city_id?: string
           created_at?: string
           currency?: string
+          deposit_amount?: number | null
           entry_fee?: number | null
           id?: string
           name?: string
@@ -246,23 +251,126 @@ export type Database = {
           },
         ]
       }
+      password_resets: {
+        Row: {
+          code_hash: string
+          created_at: string
+          expires_at: string
+          id: string
+          profile_id: string
+          used_at: string | null
+        }
+        Insert: {
+          code_hash: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          profile_id: string
+          used_at?: string | null
+        }
+        Update: {
+          code_hash?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          profile_id?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "password_resets_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          confirmed_by: string | null
+          created_at: string
+          id: string
+          league_id: string
+          method: string
+          note: string | null
+          paid_at: string
+          team_id: string
+        }
+        Insert: {
+          amount: number
+          confirmed_by?: string | null
+          created_at?: string
+          id?: string
+          league_id: string
+          method: string
+          note?: string | null
+          paid_at?: string
+          team_id: string
+        }
+        Update: {
+          amount?: number
+          confirmed_by?: string | null
+          created_at?: string
+          id?: string
+          league_id?: string
+          method?: string
+          note?: string | null
+          paid_at?: string
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_confirmed_by_fkey"
+            columns: ["confirmed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_league_id_fkey"
+            columns: ["league_id"]
+            isOneToOne: false
+            referencedRelation: "leagues"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       players: {
         Row: {
           id: string
           name: string
+          profile_id: string | null
           team_id: string
         }
         Insert: {
           id?: string
           name: string
+          profile_id?: string | null
           team_id: string
         }
         Update: {
           id?: string
           name?: string
+          profile_id?: string | null
           team_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "players_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "players_team_id_fkey"
             columns: ["team_id"]
@@ -363,30 +471,43 @@ export type Database = {
       }
       teams: {
         Row: {
+          captain_id: string | null
           captain_name: string | null
           city_id: string
           created_at: string
           id: string
+          invite_token: string | null
           name: string
           slug: string
         }
         Insert: {
+          captain_id?: string | null
           captain_name?: string | null
           city_id: string
           created_at?: string
           id?: string
+          invite_token?: string | null
           name: string
           slug: string
         }
         Update: {
+          captain_id?: string | null
           captain_name?: string | null
           city_id?: string
           created_at?: string
           id?: string
+          invite_token?: string | null
           name?: string
           slug?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "teams_captain_id_fkey"
+            columns: ["captain_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "teams_city_id_fkey"
             columns: ["city_id"]

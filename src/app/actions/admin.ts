@@ -24,6 +24,7 @@ export async function createLeague(formData: FormData) {
   const cityId = String(formData.get('city_id') ?? '');
   const rounds = Number(formData.get('rounds')) === 2 ? 2 : 1;
   const entryFeeRaw = String(formData.get('entry_fee') ?? '').trim();
+  const depositRaw = String(formData.get('deposit_amount') ?? '').trim();
 
   const { data: sport } = await supabase.from('sports').select('id').eq('key', 'football').single();
 
@@ -37,6 +38,7 @@ export async function createLeague(formData: FormData) {
       sport_id: sport!.id,
       rounds,
       entry_fee: entryFeeRaw ? Number(entryFeeRaw) : null,
+      deposit_amount: depositRaw ? Number(depositRaw) : null,
       status: 'draft',
     })
     .select('id')
@@ -73,7 +75,13 @@ export async function addTeam(leagueId: string, formData: FormData) {
 
   const { data: team, error } = await supabase
     .from('teams')
-    .insert({ name, slug: generateSlug(), city_id: league.city_id, captain_name: captainName || null })
+    .insert({
+      name,
+      slug: generateSlug(),
+      city_id: league.city_id,
+      captain_name: captainName || null,
+      invite_token: generateSlug(),
+    })
     .select('id')
     .single();
   if (error || !team) return;
@@ -94,6 +102,44 @@ export async function togglePaid(leagueId: string, teamId: string, paid: boolean
     .update({ paid })
     .eq('league_id', leagueId)
     .eq('team_id', teamId);
+  revalidatePath(`/admin/leagues/${leagueId}`);
+}
+
+const PAYMENT_METHODS = ['cash', 'bank_transfer', 'reflect', 'iburaq'] as const;
+
+// Cash or bank transfer only — confirmed by the admin, never a gateway.
+// Logs one record and, once the running total clears the deposit (or the
+// full entry fee when no deposit is set), flips league_teams.paid so the
+// team shows up as active everywhere else in the app.
+export async function addPayment(leagueId: string, teamId: string, formData: FormData) {
+  const supabase = await requireAdmin();
+
+  const amount = Number(formData.get('amount'));
+  const method = String(formData.get('method') ?? '');
+  const note = String(formData.get('note') ?? '').trim();
+  if (!amount || amount <= 0 || !PAYMENT_METHODS.includes(method as (typeof PAYMENT_METHODS)[number])) return;
+
+  const { data: user } = await supabase.auth.getUser();
+
+  await supabase.from('payments').insert({
+    league_id: leagueId,
+    team_id: teamId,
+    amount,
+    method,
+    note: note || null,
+    confirmed_by: user.user?.id ?? null,
+  });
+
+  const [{ data: league }, { data: payments }] = await Promise.all([
+    supabase.from('leagues').select('deposit_amount, entry_fee').eq('id', leagueId).single(),
+    supabase.from('payments').select('amount').eq('league_id', leagueId).eq('team_id', teamId),
+  ]);
+  const threshold = league?.deposit_amount ?? league?.entry_fee;
+  const total = (payments ?? []).reduce((sum, p) => sum + Number(p.amount), 0);
+  if (threshold && total >= Number(threshold)) {
+    await supabase.from('league_teams').update({ paid: true }).eq('league_id', leagueId).eq('team_id', teamId);
+  }
+
   revalidatePath(`/admin/leagues/${leagueId}`);
 }
 

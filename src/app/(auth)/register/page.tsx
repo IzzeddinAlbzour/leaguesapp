@@ -15,7 +15,7 @@ export default function RegisterPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-semibold">{t('registerTitle')}</h1>
+      <h1 className="display text-2xl">{t("registerTitle")}</h1>
 
       <form action={action} className="flex flex-col gap-4">
         <Field label={t('fullName')} name="fullName" required autoComplete="name" />

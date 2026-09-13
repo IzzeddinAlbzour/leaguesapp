@@ -39,7 +39,7 @@ export default async function LeaguePage({
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-lg flex-col gap-4 p-4 pb-8">
       <header className="flex flex-col gap-1 pt-2">
-        <h1 className="text-xl font-bold text-accent">{league.name}</h1>
+        <h1 className="display text-3xl text-accent">{league.name}</h1>
         <p className="text-sm text-text-dim">
           {league.city?.name_ar} · {league.season}
         </p>

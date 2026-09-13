@@ -1,14 +1,15 @@
 import { type ComponentProps } from 'react';
 
-type Variant = 'accent' | 'outline' | 'ghost';
+type Variant = 'accent' | 'gold' | 'outline' | 'ghost';
 
 const base =
   'inline-flex min-h-[var(--tap)] items-center justify-center gap-2 rounded-app px-4 text-sm font-semibold ' +
-  'transition-[background-color,border-color,opacity,transform] duration-150 active:scale-[0.98] ' +
+  'transition-[background-color,border-color,opacity,transform,box-shadow] duration-150 active:scale-[0.97] ' +
   'disabled:pointer-events-none disabled:opacity-50';
 
 const variants: Record<Variant, string> = {
-  accent: 'bg-accent text-accent-ink hover:brightness-110',
+  accent: 'bg-accent text-accent-ink shadow-[0_0_0_1px_color-mix(in_oklab,var(--pitch)_40%,transparent),0_8px_20px_-8px_var(--pitch)] hover:brightness-110',
+  gold: 'bg-gold text-gold-ink shadow-[0_8px_20px_-10px_var(--gold)] hover:brightness-110',
   outline: 'border border-border-strong text-text hover:border-accent hover:text-accent',
   ghost: 'text-text-dim hover:bg-surface-2 hover:text-text',
 };

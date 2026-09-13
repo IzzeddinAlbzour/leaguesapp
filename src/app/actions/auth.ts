@@ -69,8 +69,9 @@ export async function login(
 
   if (error) return { error: 'errorBadCredentials' };
 
+  const next = String(formData.get('next') ?? '').trim();
   revalidatePath('/', 'layout');
-  redirect('/');
+  redirect(next.startsWith('/') ? next : '/');
 }
 
 export async function logout() {

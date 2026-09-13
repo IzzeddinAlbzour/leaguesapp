@@ -45,7 +45,7 @@ export async function FixturesList({ fixtures, leagueSlug }: { fixtures: Fixture
     <div className="flex flex-col gap-6">
       {[...rounds.entries()].map(([round, matches]) => (
         <div key={round}>
-          <h3 className="mb-2 px-1 text-sm font-medium text-text-dim">{t('roundPrefix')} {round}</h3>
+          <h3 className="stripe-heading mb-2 px-1 text-sm font-medium text-text-dim">{t('roundPrefix')} {round}</h3>
           <ul className="flex flex-col gap-2">
             {matches.map((m) => {
               const played = m.status === 'played';
