@@ -1,10 +1,12 @@
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { enterResult } from '@/app/actions/admin';
 import { Button } from '@/components/ui/button';
 
 export default async function ResultEntryPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const t = await getTranslations('admin.result');
   const supabase = await createClient();
 
   const { data: matchRow } = await supabase
@@ -50,12 +52,12 @@ export default async function ResultEntryPage({ params }: { params: Promise<{ id
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <RosterColumn team={match.home_team.name} players={homePlayers ?? []} goalCounts={goalCounts} />
-          <RosterColumn team={match.away_team.name} players={awayPlayers ?? []} goalCounts={goalCounts} />
+          <RosterColumn team={match.home_team.name} players={homePlayers ?? []} goalCounts={goalCounts} noPlayersLabel={t('noPlayers')} />
+          <RosterColumn team={match.away_team.name} players={awayPlayers ?? []} goalCounts={goalCounts} noPlayersLabel={t('noPlayers')} />
         </div>
 
         <Button type="submit" className="mt-1">
-          حفظ النتيجة
+          {t('save')}
         </Button>
       </form>
     </div>
@@ -91,16 +93,18 @@ function RosterColumn({
   team,
   players,
   goalCounts,
+  noPlayersLabel,
 }: {
   team: string;
   players: { id: string; name: string }[];
   goalCounts: Map<string, number>;
+  noPlayersLabel: string;
 }) {
   return (
     <div className="flex flex-col gap-1.5">
       <h2 className="truncate text-xs font-medium text-text-dim">{team}</h2>
       {players.length === 0 ? (
-        <p className="text-xs text-text-dim">ما في لاعبين</p>
+        <p className="text-xs text-text-dim">{noPlayersLabel}</p>
       ) : (
         players.map((p) => (
           <label

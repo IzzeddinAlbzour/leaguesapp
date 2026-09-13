@@ -1,11 +1,13 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { setMatchSchedule } from '@/app/actions/admin';
 import { buttonClasses } from '@/components/ui/button';
 
 export default async function SchedulePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const t = await getTranslations('admin.schedule');
   const supabase = await createClient();
 
   const { data: league } = await supabase.from('leagues').select('id, name, city_id').eq('id', id).single();
@@ -40,7 +42,7 @@ export default async function SchedulePage({ params }: { params: Promise<{ id: s
   ];
 
   if (!matches || matches.length === 0) {
-    return <p className="text-sm text-text-dim">لسا ما تولد جدول المباريات.</p>;
+    return <p className="text-sm text-text-dim">{t('noFixtures')}</p>;
   }
 
   const unassigned = matches.filter((m) => !m.venue_id || !m.kickoff_at).length;
@@ -48,9 +50,9 @@ export default async function SchedulePage({ params }: { params: Promise<{ id: s
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <h1 className="text-lg font-semibold">{league.name} — الجدول والنتائج</h1>
+        <h1 className="text-lg font-semibold">{league.name} — {t('titleSuffix')}</h1>
         {unassigned > 0 && (
-          <p className="mt-1 text-sm text-amber">{unassigned} مباراة بدون ملعب أو موعد</p>
+          <p className="mt-1 text-sm text-amber">{t('unassignedWarning', { count: unassigned })}</p>
         )}
       </div>
 
@@ -64,7 +66,7 @@ export default async function SchedulePage({ params }: { params: Promise<{ id: s
               <span className="truncate text-sm font-medium">
                 {m.home_team?.name} × {m.away_team?.name}
               </span>
-              <span className="shrink-0 text-xs text-text-dim">ج{m.round}</span>
+              <span className="shrink-0 text-xs text-text-dim">{t('roundPrefix')}{m.round}</span>
             </div>
 
             {m.status === 'played' ? (
@@ -73,7 +75,7 @@ export default async function SchedulePage({ params }: { params: Promise<{ id: s
                   {m.home_score} - {m.away_score}
                 </span>
                 <Link href={`/admin/matches/${m.id}`} className="text-xs text-text-dim underline">
-                  تعديل
+                  {t('edit')}
                 </Link>
               </div>
             ) : (
@@ -84,7 +86,7 @@ export default async function SchedulePage({ params }: { params: Promise<{ id: s
                     defaultValue={m.venue_id ?? ''}
                     className="min-h-[var(--tap)] flex-1 rounded-app border border-border bg-canvas px-2 text-sm"
                   >
-                    <option value="">الملعب</option>
+                    <option value="">{t('venuePlaceholder')}</option>
                     {venues?.map((v) => (
                       <option key={v.id} value={v.id}>
                         {v.name}
@@ -104,11 +106,11 @@ export default async function SchedulePage({ params }: { params: Promise<{ id: s
                     className="tabular min-h-[var(--tap)] rounded-app border border-border bg-canvas px-2 text-sm"
                   />
                   <button type="submit" className={buttonClasses('outline', 'px-3 text-xs')}>
-                    حفظ
+                    {t('save')}
                   </button>
                 </form>
                 <Link href={`/admin/matches/${m.id}`} className="text-xs text-accent">
-                  تسجيل النتيجة →
+                  {t('enterResult')}
                 </Link>
               </>
             )}

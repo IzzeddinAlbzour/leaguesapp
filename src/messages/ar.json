@@ -28,5 +28,103 @@
     "errorBadCredentials": "رقم الهاتف أو كلمة السر غلط",
     "errorPhoneTaken": "هاد الرقم مسجّل من قبل",
     "errorGeneric": "صار خطأ، جرّب كمان مرة"
+  },
+  "admin": {
+    "dashboard": "لوحة التحكم",
+    "publicSite": "الموقع العام",
+    "home": {
+      "title": "الدوريات",
+      "newLeague": "دوري جديد",
+      "empty": "ما في دوريات لسا. ابدأ بإنشاء أول دوري."
+    },
+    "status": {
+      "draft": "مسودة",
+      "open": "التسجيل مفتوح",
+      "active": "جارٍ",
+      "finished": "انتهى",
+      "cancelled": "ملغى"
+    },
+    "newLeague": {
+      "title": "دوري جديد",
+      "nameLabel": "اسم الدوري",
+      "namePlaceholder": "دوري جنين للهواة",
+      "seasonLabel": "الموسم",
+      "seasonPlaceholder": "الموسم الأول",
+      "cityLabel": "المدينة",
+      "roundsLabel": "عدد الجولات",
+      "roundsOnce": "ذهاب فقط",
+      "roundsTwice": "ذهاب وإياب",
+      "feeLabel": "رسم الاشتراك (شيكل)",
+      "submit": "إنشاء الدوري"
+    },
+    "leagueSetup": {
+      "viewPublic": "عرض الصفحة العامة ↗",
+      "generateFixtures": "توليد جدول المباريات",
+      "teamSingular": "فريق",
+      "teamPlural": "فرق",
+      "minTeams": "لازم فريقين على الأقل.",
+      "manageSchedule": "إدارة الجدول والنتائج ←",
+      "venuesTitle": "الملاعب",
+      "venueNamePlaceholder": "اسم الملعب",
+      "add": "إضافة",
+      "teamsTitle": "الفرق",
+      "captainPrefix": "الكابتن:",
+      "playerSuffix": "لاعب",
+      "paid": "دفع",
+      "unpaid": "ما دفعش",
+      "teamNameLabel": "اسم الفريق",
+      "captainNameLabel": "اسم الكابتن",
+      "playersLabel": "اللاعبين (اسم بكل سطر)",
+      "playersPlaceholder": "محمد أبو الرب\nأحمد زكارنة\nيوسف قبها",
+      "addTeam": "إضافة الفريق"
+    },
+    "schedule": {
+      "titleSuffix": "الجدول والنتائج",
+      "unassignedWarning": "{count} مباراة بدون ملعب أو موعد",
+      "noFixtures": "لسا ما تولد جدول المباريات.",
+      "roundPrefix": "ج",
+      "edit": "تعديل",
+      "venuePlaceholder": "الملعب",
+      "save": "حفظ",
+      "enterResult": "تسجيل النتيجة ←"
+    },
+    "result": {
+      "save": "حفظ النتيجة",
+      "noPlayers": "ما في لاعبين"
+    }
+  },
+  "league": {
+    "tabFixtures": "المباريات",
+    "tabStandings": "الترتيب",
+    "tabScorers": "الهدافين"
+  },
+  "team": {
+    "captainPrefix": "الكابتن:",
+    "rosterTitle": "التشكيلة",
+    "noPlayers": "ما في لاعبين مسجلين لسا.",
+    "matchesTitle": "المباريات",
+    "noMatches": "ما في مباريات لسا.",
+    "roundPrefix": "الجولة"
+  },
+  "fixtures": {
+    "empty": "لسا ما تحدد جدول المباريات.",
+    "roundPrefix": "الجولة",
+    "vs": "vs",
+    "dateTbd": "الموعد لسا"
+  },
+  "standings": {
+    "empty": "ما في فرق بالدوري لسا.",
+    "team": "الفريق",
+    "played": "لعب",
+    "won": "فاز",
+    "drawn": "تعادل",
+    "lost": "خسر",
+    "goalsFor": "له",
+    "goalsAgainst": "عليه",
+    "goalDifference": "فرق",
+    "points": "نقاط"
+  },
+  "scorers": {
+    "empty": "ولا هدف لسا. أول هدف بالموسم رح يبان هون."
   }
 }

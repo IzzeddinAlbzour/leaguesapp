@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { IBM_Plex_Sans_Arabic } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
+import { getMessages, getTranslations } from 'next-intl/server';
 import './globals.css';
 
 const arabic = IBM_Plex_Sans_Arabic({
@@ -10,10 +10,10 @@ const arabic = IBM_Plex_Sans_Arabic({
   variable: '--font-arabic',
 });
 
-export const metadata: Metadata = {
-  title: 'دوريات',
-  description: 'دوريات الهواة في فلسطين',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('app');
+  return { title: t('name'), description: t('tagline') };
+}
 
 export default async function RootLayout({
   children,

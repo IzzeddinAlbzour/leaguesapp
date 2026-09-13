@@ -1,17 +1,13 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { getFixtures, getLeagueBySlug, getStandings, getTopScorers } from '@/lib/queries';
 import { FixturesList } from '@/components/fixtures-list';
 import { StandingsTable } from '@/components/standings-table';
 import { ScorersList } from '@/components/scorers-list';
 
-const TABS = [
-  { key: 'fixtures', label: 'المباريات' },
-  { key: 'standings', label: 'الترتيب' },
-  { key: 'scorers', label: 'الهدافين' },
-] as const;
-
-type TabKey = (typeof TABS)[number]['key'];
+const TAB_KEYS = ['fixtures', 'standings', 'scorers'] as const;
+type TabKey = (typeof TAB_KEYS)[number];
 
 export default async function LeaguePage({
   params,
@@ -22,11 +18,17 @@ export default async function LeaguePage({
 }) {
   const { slug } = await params;
   const { tab } = await searchParams;
+  const t = await getTranslations('league');
 
   const league = await getLeagueBySlug(slug);
   if (!league) notFound();
 
-  const activeTab: TabKey = TABS.some((t) => t.key === tab) ? (tab as TabKey) : 'fixtures';
+  const activeTab: TabKey = TAB_KEYS.includes(tab as TabKey) ? (tab as TabKey) : 'fixtures';
+  const TABS = [
+    { key: 'fixtures' as const, label: t('tabFixtures') },
+    { key: 'standings' as const, label: t('tabStandings') },
+    { key: 'scorers' as const, label: t('tabScorers') },
+  ];
 
   const [fixtures, standings, scorers] = await Promise.all([
     activeTab === 'fixtures' ? getFixtures(league.id) : Promise.resolve([]),

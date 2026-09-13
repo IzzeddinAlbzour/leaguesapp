@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import type { StandingsRow } from '@/lib/queries';
 
 /**
@@ -11,23 +12,24 @@ import type { StandingsRow } from '@/lib/queries';
  * a real table — scanning down a column to compare teams still works —
  * instead of collapsing into cards, which would break exactly that.
  */
-export function StandingsTable({ rows, leagueSlug }: { rows: StandingsRow[]; leagueSlug: string }) {
+export async function StandingsTable({ rows, leagueSlug }: { rows: StandingsRow[]; leagueSlug: string }) {
+  const t = await getTranslations('standings');
   if (rows.length === 0) {
     return (
       <p className="py-10 text-center text-text-dim">
-        ما في فرق بالدوري لسا.
+        {t('empty')}
       </p>
     );
   }
 
   const cols: { key: keyof StandingsRow; label: string; tone?: 'dim' }[] = [
-    { key: 'played', label: 'لعب' },
-    { key: 'won', label: 'فاز' },
-    { key: 'drawn', label: 'تعادل', tone: 'dim' },
-    { key: 'lost', label: 'خسر' },
-    { key: 'goals_for', label: 'له' },
-    { key: 'goals_against', label: 'عليه' },
-    { key: 'goal_difference', label: 'فرق' },
+    { key: 'played', label: t('played') },
+    { key: 'won', label: t('won') },
+    { key: 'drawn', label: t('drawn'), tone: 'dim' },
+    { key: 'lost', label: t('lost') },
+    { key: 'goals_for', label: t('goalsFor') },
+    { key: 'goals_against', label: t('goalsAgainst') },
+    { key: 'goal_difference', label: t('goalDifference') },
   ];
 
   return (
@@ -36,7 +38,7 @@ export function StandingsTable({ rows, leagueSlug }: { rows: StandingsRow[]; lea
         <thead>
           <tr className="border-b border-border text-text-dim">
             <th className="sticky inset-inline-start-0 z-10 bg-surface px-3 py-2.5 text-start font-medium">
-              الفريق
+              {t('team')}
             </th>
             {cols.map((c) => (
               <th
@@ -47,7 +49,7 @@ export function StandingsTable({ rows, leagueSlug }: { rows: StandingsRow[]; lea
               </th>
             ))}
             <th className="min-w-14 bg-surface-2 px-3 py-2.5 text-center font-semibold text-text">
-              نقاط
+              {t('points')}
             </th>
           </tr>
         </thead>

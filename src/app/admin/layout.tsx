@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const t = await getTranslations('admin');
   const supabase = await createClient();
   const { data } = await supabase.auth.getUser();
   if (!data.user) redirect('/login');
@@ -18,10 +20,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <div className="mx-auto min-h-dvh w-full max-w-2xl px-4 pb-10">
       <header className="flex items-center justify-between border-b border-border py-4">
         <Link href="/admin" className="font-bold text-accent">
-          لوحة التحكم
+          {t('dashboard')}
         </Link>
         <Link href="/" className="text-sm text-text-dim">
-          الموقع العام
+          {t('publicSite')}
         </Link>
       </header>
       <div className="pt-5">{children}</div>

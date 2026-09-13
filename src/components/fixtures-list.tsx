@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 
 type Fixture = {
   id: string;
@@ -24,11 +25,12 @@ const timeFormatter = new Intl.DateTimeFormat('ar', {
   numberingSystem: 'latn',
 });
 
-export function FixturesList({ fixtures, leagueSlug }: { fixtures: Fixture[]; leagueSlug: string }) {
+export async function FixturesList({ fixtures, leagueSlug }: { fixtures: Fixture[]; leagueSlug: string }) {
+  const t = await getTranslations('fixtures');
   if (fixtures.length === 0) {
     return (
       <p className="py-10 text-center text-text-dim">
-        لسا ما تحدد جدول المباريات.
+        {t('empty')}
       </p>
     );
   }
@@ -43,7 +45,7 @@ export function FixturesList({ fixtures, leagueSlug }: { fixtures: Fixture[]; le
     <div className="flex flex-col gap-6">
       {[...rounds.entries()].map(([round, matches]) => (
         <div key={round}>
-          <h3 className="mb-2 px-1 text-sm font-medium text-text-dim">الجولة {round}</h3>
+          <h3 className="mb-2 px-1 text-sm font-medium text-text-dim">{t('roundPrefix')} {round}</h3>
           <ul className="flex flex-col gap-2">
             {matches.map((m) => {
               const played = m.status === 'played';
@@ -59,7 +61,7 @@ export function FixturesList({ fixtures, leagueSlug }: { fixtures: Fixture[]; le
                         {m.home_score} - {m.away_score}
                       </span>
                     ) : (
-                      <span className="shrink-0 text-xs text-text-dim">vs</span>
+                      <span className="shrink-0 text-xs text-text-dim">{t('vs')}</span>
                     )}
                     <TeamName team={m.away_team} leagueSlug={leagueSlug} align="end" />
                   </div>
@@ -70,7 +72,7 @@ export function FixturesList({ fixtures, leagueSlug }: { fixtures: Fixture[]; le
                         <span className="tabular">{timeFormatter.format(new Date(m.kickoff_at))}</span>
                       </>
                     ) : (
-                      <span>الموعد لسا</span>
+                      <span>{t('dateTbd')}</span>
                     )}
                     {m.venue && <span>{m.venue.name}</span>}
                   </div>

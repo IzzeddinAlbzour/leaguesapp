@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { getLeagueBySlug, getTeamBySlug } from '@/lib/queries';
 import { createClient } from '@/lib/supabase/server';
 
@@ -9,6 +10,7 @@ export default async function TeamPage({
   params: Promise<{ slug: string; teamSlug: string }>;
 }) {
   const { slug, teamSlug } = await params;
+  const t = await getTranslations('team');
 
   const [league, result] = await Promise.all([getLeagueBySlug(slug), getTeamBySlug(teamSlug)]);
   if (!league || !result) notFound();
@@ -44,14 +46,14 @@ export default async function TeamPage({
       <header className="flex flex-col gap-1">
         <h1 className="text-xl font-bold">{team.name}</h1>
         {team.captain_name && (
-          <p className="text-sm text-text-dim">الكابتن: {team.captain_name}</p>
+          <p className="text-sm text-text-dim">{t('captainPrefix')} {team.captain_name}</p>
         )}
       </header>
 
       <section>
-        <h2 className="mb-2 text-sm font-medium text-text-dim">التشكيلة</h2>
+        <h2 className="mb-2 text-sm font-medium text-text-dim">{t('rosterTitle')}</h2>
         {players.length === 0 ? (
-          <p className="text-sm text-text-dim">ما في لاعبين مسجلين لسا.</p>
+          <p className="text-sm text-text-dim">{t('noPlayers')}</p>
         ) : (
           <ul className="flex flex-col gap-1">
             {players.map((p) => (
@@ -67,9 +69,9 @@ export default async function TeamPage({
       </section>
 
       <section>
-        <h2 className="mb-2 text-sm font-medium text-text-dim">المباريات</h2>
+        <h2 className="mb-2 text-sm font-medium text-text-dim">{t('matchesTitle')}</h2>
         {!matches || matches.length === 0 ? (
-          <p className="text-sm text-text-dim">ما في مباريات لسا.</p>
+          <p className="text-sm text-text-dim">{t('noMatches')}</p>
         ) : (
           <ul className="flex flex-col gap-1.5">
             {matches.map((m) => (
@@ -85,7 +87,7 @@ export default async function TeamPage({
                     {m.home_score}-{m.away_score}
                   </span>
                 ) : (
-                  <span className="text-text-dim">الجولة {m.round}</span>
+                  <span className="text-text-dim">{t('roundPrefix')} {m.round}</span>
                 )}
               </li>
             ))}

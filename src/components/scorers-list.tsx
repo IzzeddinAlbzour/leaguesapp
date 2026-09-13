@@ -1,10 +1,12 @@
+import { getTranslations } from 'next-intl/server';
 import type { ScorerRow } from '@/lib/queries';
 
-export function ScorersList({ scorers }: { scorers: ScorerRow[] }) {
+export async function ScorersList({ scorers }: { scorers: ScorerRow[] }) {
+  const t = await getTranslations('scorers');
   if (scorers.length === 0) {
     return (
       <p className="py-10 text-center text-text-dim">
-        ولا هدف لسا. أول هدف بالموسم رح يبان هون.
+        {t('empty')}
       </p>
     );
   }
