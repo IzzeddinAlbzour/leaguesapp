@@ -78,9 +78,11 @@ export async function removeAvailabilitySlot(slotId: string) {
 }
 
 export async function updateVenueName(formData: FormData) {
-  const { supabase, venueId } = await requireVenueOwner();
+  const { venueId } = await requireVenueOwner();
   const name = String(formData.get('name') ?? '').trim();
   if (!name) return;
-  await supabase.from('venues').update({ name }).eq('id', venueId);
+
+  const admin = createAdminClient();
+  await admin.from('venues').update({ name }).eq('id', venueId);
   revalidatePath('/venue/info');
 }
