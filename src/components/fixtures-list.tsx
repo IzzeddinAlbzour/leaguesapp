@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
+import { formatDay, formatTime } from '@/lib/datetime';
 
 type Fixture = {
   id: string;
@@ -12,18 +13,6 @@ type Fixture = {
   away_team: { name: string; slug: string } | null;
   venue: { name: string } | null;
 };
-
-const dayFormatter = new Intl.DateTimeFormat('ar', {
-  weekday: 'long',
-  day: 'numeric',
-  month: 'long',
-  numberingSystem: 'latn', // Western digits — never Arabic-Indic
-});
-const timeFormatter = new Intl.DateTimeFormat('ar', {
-  hour: 'numeric',
-  minute: '2-digit',
-  numberingSystem: 'latn',
-});
 
 export async function FixturesList({ fixtures, leagueSlug }: { fixtures: Fixture[]; leagueSlug: string }) {
   const t = await getTranslations('fixtures');
@@ -68,8 +57,8 @@ export async function FixturesList({ fixtures, leagueSlug }: { fixtures: Fixture
                   <div className="flex shrink-0 flex-col items-end gap-0.5 text-end text-xs text-text-dim">
                     {m.kickoff_at ? (
                       <>
-                        <span>{dayFormatter.format(new Date(m.kickoff_at))}</span>
-                        <span className="tabular">{timeFormatter.format(new Date(m.kickoff_at))}</span>
+                        <span>{formatDay(m.kickoff_at)}</span>
+                        <span className="tabular">{formatTime(m.kickoff_at)}</span>
                       </>
                     ) : (
                       <span>{t('dateTbd')}</span>

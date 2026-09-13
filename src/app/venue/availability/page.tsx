@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { addAvailabilitySlot, removeAvailabilitySlot } from '@/app/actions/venue';
 import { buttonClasses } from '@/components/ui/button';
+import { formatDay } from '@/lib/datetime';
 
 export default async function VenueAvailabilityPage() {
   const t = await getTranslations('venue.availability');
@@ -27,16 +28,19 @@ export default async function VenueAvailabilityPage() {
         <input
           type="date"
           name="date"
+          aria-label={t('dateLabel')}
           className="tabular min-h-[var(--tap)] rounded-app border border-border bg-canvas px-2 text-sm"
         />
         <input
           type="time"
           name="start_time"
+          aria-label={t('startLabel')}
           className="tabular min-h-[var(--tap)] rounded-app border border-border bg-canvas px-2 text-sm"
         />
         <input
           type="time"
           name="end_time"
+          aria-label={t('endLabel')}
           className="tabular min-h-[var(--tap)] rounded-app border border-border bg-canvas px-2 text-sm"
         />
         <button type="submit" className={buttonClasses('accent', 'px-3 text-xs')}>
@@ -51,7 +55,12 @@ export default async function VenueAvailabilityPage() {
           {slots.map((s) => (
             <li key={s.id} className="flex items-center justify-between rounded-app border border-border bg-surface p-3">
               <span className="tabular text-sm">
-                {s.date} — {s.start_time.slice(0, 5)} → {s.end_time.slice(0, 5)}
+                {formatDay(s.date)}
+                {' — '}
+                {/* the arrow is LTR-directional; isolate it so RTL flow doesn't flip the range */}
+                <span dir="ltr">
+                  {s.start_time.slice(0, 5)} → {s.end_time.slice(0, 5)}
+                </span>
               </span>
               <form action={removeAvailabilitySlot.bind(null, s.id)}>
                 <button type="submit" className={buttonClasses('ghost', 'px-2 text-xs')}>

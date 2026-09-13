@@ -17,7 +17,7 @@ export default async function SchedulePage({ params }: { params: Promise<{ id: s
     supabase
       .from('matches')
       .select(
-        'id, round, status, home_score, away_score, kickoff_at, venue_id, ' +
+        'id, round, status, home_score, away_score, kickoff_at, venue_id, venue_confirmation_status, ' +
           'home_team:teams!matches_home_team_id_fkey(name), ' +
           'away_team:teams!matches_away_team_id_fkey(name)',
       )
@@ -34,6 +34,7 @@ export default async function SchedulePage({ params }: { params: Promise<{ id: s
         away_score: number | null;
         kickoff_at: string | null;
         venue_id: string | null;
+        venue_confirmation_status: string | null;
         home_team: { name: string } | null;
         away_team: { name: string } | null;
       }> | null;
@@ -45,7 +46,11 @@ export default async function SchedulePage({ params }: { params: Promise<{ id: s
     return <p className="text-sm text-text-dim">{t('noFixtures')}</p>;
   }
 
-  const unassigned = matches.filter((m) => !m.venue_id || !m.kickoff_at).length;
+  // A venue-rejected match still has its venue_id, so it needs its own clause —
+  // otherwise the rejection is invisible here and the admin never reassigns it.
+  const needsAttention = (m: { venue_id: string | null; kickoff_at: string | null; venue_confirmation_status: string | null }) =>
+    !m.venue_id || !m.kickoff_at || m.venue_confirmation_status === 'rejected';
+  const unassigned = matches.filter(needsAttention).length;
 
   return (
     <div className="flex flex-col gap-4">
@@ -66,7 +71,14 @@ export default async function SchedulePage({ params }: { params: Promise<{ id: s
               <span className="truncate text-sm font-medium">
                 {m.home_team?.name} × {m.away_team?.name}
               </span>
-              <span className="shrink-0 text-xs text-text-dim">{t('roundPrefix')}{m.round}</span>
+              <div className="flex shrink-0 items-center gap-2">
+                {m.venue_confirmation_status === 'rejected' && (
+                  <span className="rounded bg-surface-2 px-2 py-0.5 text-xs font-medium text-amber">
+                    {t('venueRejected')}
+                  </span>
+                )}
+                <span className="text-xs text-text-dim">{t('roundPrefix')}{m.round}</span>
+              </div>
             </div>
 
             {m.status === 'played' ? (

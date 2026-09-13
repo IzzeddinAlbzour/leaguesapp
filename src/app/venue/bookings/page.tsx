@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { confirmBooking, rejectBooking } from '@/app/actions/venue';
 import { buttonClasses } from '@/components/ui/button';
+import { formatDay, formatTime } from '@/lib/datetime';
 
 export default async function VenueBookingsPage() {
   const t = await getTranslations('venue.bookings');
@@ -51,7 +52,7 @@ export default async function VenueBookingsPage() {
                 {m.home_team?.name} × {m.away_team?.name}
               </span>
               <span className="tabular text-xs text-text-dim">
-                {m.kickoff_at ? new Date(m.kickoff_at).toLocaleString('ar') : ''}
+                {m.kickoff_at ? `${formatDay(m.kickoff_at)} · ${formatTime(m.kickoff_at)}` : ''}
               </span>
             </div>
             <span className="text-xs text-text-dim">

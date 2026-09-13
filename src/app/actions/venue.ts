@@ -33,14 +33,14 @@ async function setBookingStatus(matchId: string, status: 'confirmed' | 'rejected
     .single();
   if (!match || match.venue_id !== venueId) return;
 
+  // A reject keeps venue_id. Clearing it made a rejected match look identical
+  // to a never-assigned one — the admin lost the "who said no", and the row
+  // vanished from the owner's own list, which filters by venue_id. The admin
+  // reassigns via the schedule page, and setMatchSchedule resets this to
+  // 'pending'. Rejecting an already-confirmed booking is allowed on purpose
+  // (owner changed their mind); status is the only column that moves.
   const admin = createAdminClient();
-  await admin
-    .from('matches')
-    .update({
-      venue_confirmation_status: status,
-      venue_id: status === 'rejected' ? null : match.venue_id,
-    })
-    .eq('id', matchId);
+  await admin.from('matches').update({ venue_confirmation_status: status }).eq('id', matchId);
 
   revalidatePath('/venue/bookings');
   revalidatePath('/venue');
@@ -72,8 +72,8 @@ export async function addAvailabilitySlot(formData: FormData) {
 }
 
 export async function removeAvailabilitySlot(slotId: string) {
-  const { supabase } = await requireVenueOwner();
-  await supabase.from('venue_availability').delete().eq('id', slotId);
+  const { supabase, venueId } = await requireVenueOwner();
+  await supabase.from('venue_availability').delete().eq('id', slotId).eq('venue_id', venueId);
   revalidatePath('/venue/availability');
 }
 

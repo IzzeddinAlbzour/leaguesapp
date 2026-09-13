@@ -83,7 +83,8 @@
     },
     "schedule": {
       "titleSuffix": "الجدول والنتائج",
-      "unassignedWarning": "{count} مباراة بدون ملعب أو موعد",
+      "unassignedWarning": "{count} مباراة بدون ملعب أو موعد أو مرفوضة من الملعب",
+      "venueRejected": "مرفوض",
       "noFixtures": "لسا ما تولد جدول المباريات.",
       "roundPrefix": "ج",
       "edit": "تعديل",
@@ -131,7 +132,7 @@
       "nameLabel": "اسم الملعب",
       "namePlaceholder": "ملعب جنين الرياضي",
       "cityLabel": "المدينة",
-      "feeLabel": "أجرة المباراة (شيكل)",
+      "feeLabel": "أجرة المباراة",
       "submit": "إضافة الملعب",
       "noOwner": "بلا صاحب ملعب",
       "assignOwnerTitle": "ربط صاحب الملعب",
@@ -154,7 +155,7 @@
     "home": {
       "pendingCount": "حجوزات بانتظار الموافقة: {count}",
       "upcomingCount": "مباريات مؤكدة قادمة: {count}",
-      "revenue": "الإيراد الحالي: {amount} شيكل"
+      "revenue": "الإيراد الحالي: {amount} {currency}"
     },
     "bookings": {
       "title": "الحجوزات",

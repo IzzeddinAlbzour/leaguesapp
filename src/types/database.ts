@@ -558,6 +558,7 @@ export type Database = {
       venues: {
         Row: {
           city_id: string
+          currency: string
           fee_per_match: number
           id: string
           is_active: boolean
@@ -566,6 +567,7 @@ export type Database = {
         }
         Insert: {
           city_id: string
+          currency?: string
           fee_per_match?: number
           id?: string
           is_active?: boolean
@@ -574,6 +576,7 @@ export type Database = {
         }
         Update: {
           city_id?: string
+          currency?: string
           fee_per_match?: number
           id?: string
           is_active?: boolean

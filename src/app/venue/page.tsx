@@ -11,7 +11,7 @@ export default async function VenueDashboardPage() {
 
   const { data: venue } = await supabase
     .from('venues')
-    .select('id, fee_per_match')
+    .select('id, fee_per_match, currency')
     .eq('owner_id', auth.user.id)
     .single();
   if (!venue) redirect('/');
@@ -37,7 +37,7 @@ export default async function VenueDashboardPage() {
         {t('upcomingCount', { count: upcomingCount })}
       </p>
       <p className="tabular rounded-app border border-border bg-surface p-3 text-sm font-semibold text-accent">
-        {t('revenue', { amount: revenue })}
+        {t('revenue', { amount: revenue, currency: venue.currency })}
       </p>
     </div>
   );
