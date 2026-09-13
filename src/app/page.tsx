@@ -47,6 +47,10 @@ export default async function Home() {
           </Link>
         </div>
       )}
+
+      <Link href="/terms" className="text-center text-xs text-text-dim underline">
+        {t('terms.title')}
+      </Link>
     </main>
   );
 }
