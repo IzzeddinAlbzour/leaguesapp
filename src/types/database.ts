@@ -192,6 +192,7 @@ export type Database = {
           league_id: string
           round: number
           status: string
+          venue_confirmation_status: string | null
           venue_id: string | null
         }
         Insert: {
@@ -205,6 +206,7 @@ export type Database = {
           league_id: string
           round: number
           status?: string
+          venue_confirmation_status?: string | null
           venue_id?: string | null
         }
         Update: {
@@ -218,6 +220,7 @@ export type Database = {
           league_id?: string
           round?: number
           status?: string
+          venue_confirmation_status?: string | null
           venue_id?: string | null
         }
         Relationships: [
@@ -517,24 +520,65 @@ export type Database = {
           },
         ]
       }
+      venue_availability: {
+        Row: {
+          created_at: string
+          date: string
+          end_time: string
+          id: string
+          start_time: string
+          venue_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          end_time: string
+          id?: string
+          start_time: string
+          venue_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          end_time?: string
+          id?: string
+          start_time?: string
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venue_availability_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       venues: {
         Row: {
           city_id: string
+          fee_per_match: number
           id: string
           is_active: boolean
           name: string
+          owner_id: string | null
         }
         Insert: {
           city_id: string
+          fee_per_match?: number
           id?: string
           is_active?: boolean
           name: string
+          owner_id?: string | null
         }
         Update: {
           city_id?: string
+          fee_per_match?: number
           id?: string
           is_active?: boolean
           name?: string
+          owner_id?: string | null
         }
         Relationships: [
           {
@@ -542,6 +586,13 @@ export type Database = {
             columns: ["city_id"]
             isOneToOne: false
             referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "venues_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
