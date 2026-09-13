@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
 import { getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { addPlayerByCaptain, registerForLeague, removePlayer } from '@/app/actions/team';
@@ -59,12 +60,13 @@ export default async function MyTeamPage() {
   const registeredIds = new Set((registrations ?? []).map((r) => (r.league as unknown as { id: string })?.id));
   const availableLeagues = (openLeagues ?? []).filter((l) => !registeredIds.has(l.id));
 
-  const inviteUrl =
-    typeof process.env.NEXT_PUBLIC_SITE_URL === 'string' && team.invite_token
-      ? `${process.env.NEXT_PUBLIC_SITE_URL}/join/${team.invite_token}`
-      : team.invite_token
-        ? `/join/${team.invite_token}`
-        : null;
+  let inviteUrl: string | null = null;
+  if (team.invite_token) {
+    const h = await headers();
+    const host = h.get('host');
+    const protocol = host?.startsWith('localhost') ? 'http' : 'https';
+    inviteUrl = host ? `${protocol}://${host}/join/${team.invite_token}` : `/join/${team.invite_token}`;
+  }
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-lg flex-col gap-8 p-4 pb-10">
