@@ -138,7 +138,10 @@ today; every screen in the current build is an island reached by hitting
 back to `/`.
 
 **Public, no account required:**
-- League page — fixtures / standings / scorers tabs (exists, reskinned)
+- **Leagues directory** (`/`, logged-out with no link) — does not exist
+  today; section 13.
+- League page — fixtures / standings / scorers tabs (exists, reskinned;
+  section 12: fixtures is the default tab before any result exists)
 - **Match page** (`/l/[slug]/m/[matchId]`) — does not exist today. The
   destination for a shared link: hero match card, scorers, venue, a link
   back to the league.
@@ -146,6 +149,8 @@ back to `/`.
 - Player card (exists as a stub; rebuilt per section 6)
 - Invite landing (`/join/[token]`, exists)
 - Terms (exists)
+- **404 / error page** — does not exist today (framework default);
+  section 15.
 
 **Auth:** register, login, reset-password redeem (exist, reskinned)
 
@@ -154,8 +159,10 @@ back to `/`.
   season tally. Real content; today's `/` is a placeholder link list.
 - Available-players pool opt-in (new — section 2)
 - My team (exists as `/team`, becomes read-only for a non-captain member
-  plus a "leave team" action)
-- Profile (exists, gains `looking_for_team` toggle)
+  plus a "leave team" action; becomes a chooser for multi-team members —
+  section 15)
+- Profile (exists) + **settings section** (new — password change, the
+  `looking_for_team` toggle, WhatsApp opt-in status; section 14)
 - My card (exists as a stub; rebuilt per section 6)
 
 **Captain (superset of player):**
@@ -179,7 +186,8 @@ back to `/`.
 - Admin home — **today's matches across all leagues first**, league list
   second. The current admin home is a bare league list; an admin running a
   Friday night matchday needs "what's happening today," not "what leagues
-  exist."
+  exist." First session with zero leagues shows one "دوري جديد" action in
+  that slot instead of an empty list (section 12).
 - League create, league setup (exist, reskinned; deposit/payment-method
   fields gain the "how to pay" copy captains see)
 - Payments ledger (exists as of the last session's build; gains the
@@ -383,7 +391,99 @@ note on why "live" stays approximate), ELO rating, transfer market,
 knockout tournaments, AI scheduling, a separate admin app, streaks/XP/
 badges/engagement-farming mechanics (section 7), push notifications.
 
-## 12. Open questions for implementation planning
+## 12. First-run clarity (not a tour)
+
+Section 4/7 already rejects a tutorial walkthrough: for anyone arriving
+via an invite link, the flow itself *is* the onboarding — tap, register,
+land on a roster, see a match. That stays. The actual gap is narrower and
+real: **a player who registers with no invite has nothing to look at.**
+
+- **Self-registered, no invite → the teamless state is a real screen, not
+  a blank one.** One sentence explaining the two doors (section 2: enter a
+  code, or list yourself as available), and the available-players pool
+  preview shows other teamless players already in it — social proof that
+  the door works, not just a form.
+- **Admin's very first session** (fresh install, seed data only, zero
+  leagues) — the admin home (section 4) shows a single "دوري جديد" action
+  in place of an empty list, not an empty state with no next step.
+- **A league with zero teams yet** (`status='open'`, freshly created) —
+  the public league page says registration is open and how to join
+  (share the league link), instead of rendering an empty standings table
+  with no explanation.
+- **A league before any result exists** (`status='active'`, round 1 not
+  played) — fixtures tab is the default instead of standings (an all-zero
+  table is the least interesting thing to show first).
+
+None of this is a modal, a tour, or a "step 3 of 5." It's each empty/
+first state written as if a person will actually land there cold, because
+they will.
+
+## 13. Discovery — finding a league without a link
+
+Every screen in section 4 assumes the visitor already has a link. Nothing
+in the app answers "what leagues exist in my city" for someone who
+doesn't. This is a real gap, not a nice-to-have — it's the difference
+between "share-only" and an app someone can actually find their way into.
+
+- **`/` for a logged-out visitor with no link** gains a leagues directory:
+  active and open leagues, grouped by city, newest first. This is the
+  page a captain screenshots into a citywide sports group, and the page
+  a search-engine visitor lands on.
+- City filter only (matches the existing `cities` table); no search bar
+  at this scale — a handful of cities each with a handful of leagues
+  doesn't need one, and adding one would be scope the data doesn't
+  justify yet.
+- A `finished` league still lists here (dimmed, filtered by default) so a
+  past champion screen (section 6) stays reachable, not orphaned once its
+  season ends.
+
+## 14. Settings & account surfaces
+
+The current build has a profile *edit* screen and nothing else — no
+password change outside the admin-mediated reset, no logout confirmation
+for a destructive-feeling action, no notification consent surface.
+
+- **`/profile` gains a settings section**, not a separate screen: change
+  password (requires the current one — this is the one auth surface that
+  doesn't need to be admin-mediated, since the user already has a working
+  session), and the `looking_for_team` toggle from section 2.
+- **WhatsApp opt-in is its own explicit moment**, not silent. `profiles.
+  wa_contact_opened_at` already exists in the schema for the slice-7
+  handshake; the gap is that no screen ever asks. On first login after
+  slice 7 ships, one dismissible prompt: what it's for (match reminders,
+  results, payment confirmations — named, not "notifications"), one tap
+  to open WhatsApp and message the bot number, done. Skippable, and
+  reachable again later from the settings section above — never a
+  blocking gate.
+- **Logout asks once** (a plain confirm, not a modal essay) — the current
+  build fires it on a single tap with no confirmation, which is the wrong
+  side of "destructive-feeling" for something that just ends a session.
+
+## 15. Multi-team & error surfaces
+
+- **A player who is a member of more than one team** (allowed since
+  section 2 — same player, two different leagues, two different teams)
+  — `/team` becomes a chooser when membership count is more than one,
+  otherwise it goes straight to the single team, matching the current
+  single-team shape exactly so the common case gains zero extra taps.
+  Home's hero match card picks the *soonest* upcoming match across every
+  team the player belongs to, not just one arbitrarily.
+- **404** — an unmatched route (a dead invite link, a deleted team's old
+  URL) gets the same visual system as everything else (team-colorless,
+  ink-on-canvas, the display face on one line of copy) with a single way
+  back to the leagues directory (section 13), never the framework's
+  default error page.
+- **A server/database error on a public page** — same visual treatment,
+  copy that says try again rather than exposing an error code, and for a
+  page that has cached/stale data available (section 5's offline
+  handling), prefer showing the stale data over a hard failure.
+- **Form validation** — inline, next to the field, in the same Arabic
+  voice as the rest of the copy (section titled "Copy" in the earlier
+  2026-09-10 spec's DESIGN.md already sets this tone; this is its
+  application to every new form this spec adds — team settings, roster
+  invite-from-pool, captaincy transfer, withdrawal).
+
+## 16. Open questions for implementation planning
 
 - Whether `is_captain_of()` needs a companion `is_member_of()` for the
   roster-visibility policies non-captain members need (viewing payment
