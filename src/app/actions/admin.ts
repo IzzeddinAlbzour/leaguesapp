@@ -186,7 +186,12 @@ export async function setMatchSchedule(matchId: string, formData: FormData) {
 
   const { data: match } = await supabase
     .from('matches')
-    .update({ venue_id: venueId, kickoff_at: kickoffAt })
+    .update({
+      venue_id: venueId,
+      kickoff_at: kickoffAt,
+      // Assigning a venue reopens confirmation; clearing it clears the flag too.
+      venue_confirmation_status: venueId ? 'pending' : null,
+    })
     .eq('id', matchId)
     .select('league_id')
     .single();
