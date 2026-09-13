@@ -1,0 +1,201 @@
+'use server';
+
+import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
+import { createClient } from '@/lib/supabase/server';
+import { generateSlug } from '@/lib/slug';
+import { generateFixtures as computeFixtures } from '@/lib/fixtures';
+
+async function requireAdmin() {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getUser();
+  const { data: profile } = data.user
+    ? await supabase.from('profiles').select('role').eq('id', data.user.id).single()
+    : { data: null };
+  if (profile?.role !== 'admin') redirect('/');
+  return supabase;
+}
+
+export async function createLeague(formData: FormData) {
+  const supabase = await requireAdmin();
+
+  const name = String(formData.get('name') ?? '').trim();
+  const season = String(formData.get('season') ?? '').trim();
+  const cityId = String(formData.get('city_id') ?? '');
+  const rounds = Number(formData.get('rounds')) === 2 ? 2 : 1;
+  const entryFeeRaw = String(formData.get('entry_fee') ?? '').trim();
+
+  const { data: sport } = await supabase.from('sports').select('id').eq('key', 'football').single();
+
+  const { data: league, error } = await supabase
+    .from('leagues')
+    .insert({
+      name,
+      slug: generateSlug(),
+      season,
+      city_id: cityId,
+      sport_id: sport!.id,
+      rounds,
+      entry_fee: entryFeeRaw ? Number(entryFeeRaw) : null,
+      status: 'draft',
+    })
+    .select('id')
+    .single();
+
+  if (error || !league) throw new Error('تعذر إنشاء الدوري');
+
+  redirect(`/admin/leagues/${league.id}`);
+}
+
+export async function addVenue(leagueId: string, formData: FormData) {
+  const supabase = await requireAdmin();
+  const { data: league } = await supabase.from('leagues').select('city_id').eq('id', leagueId).single();
+  const name = String(formData.get('name') ?? '').trim();
+  if (!name || !league) return;
+
+  await supabase.from('venues').insert({ name, city_id: league.city_id });
+  revalidatePath(`/admin/leagues/${leagueId}`);
+}
+
+export async function addTeam(leagueId: string, formData: FormData) {
+  const supabase = await requireAdmin();
+  const { data: league } = await supabase.from('leagues').select('city_id').eq('id', leagueId).single();
+  if (!league) return;
+
+  const name = String(formData.get('name') ?? '').trim();
+  const captainName = String(formData.get('captain_name') ?? '').trim();
+  const playerNames = String(formData.get('players') ?? '')
+    .split('\n')
+    .map((n) => n.trim())
+    .filter(Boolean);
+
+  if (!name) return;
+
+  const { data: team, error } = await supabase
+    .from('teams')
+    .insert({ name, slug: generateSlug(), city_id: league.city_id, captain_name: captainName || null })
+    .select('id')
+    .single();
+  if (error || !team) return;
+
+  await supabase.from('league_teams').insert({ league_id: leagueId, team_id: team.id, paid: false });
+
+  if (playerNames.length > 0) {
+    await supabase.from('players').insert(playerNames.map((n) => ({ team_id: team.id, name: n })));
+  }
+
+  revalidatePath(`/admin/leagues/${leagueId}`);
+}
+
+export async function togglePaid(leagueId: string, teamId: string, paid: boolean) {
+  const supabase = await requireAdmin();
+  await supabase
+    .from('league_teams')
+    .update({ paid })
+    .eq('league_id', leagueId)
+    .eq('team_id', teamId);
+  revalidatePath(`/admin/leagues/${leagueId}`);
+}
+
+export async function generateLeagueFixtures(leagueId: string) {
+  const supabase = await requireAdmin();
+
+  const { data: league } = await supabase.from('leagues').select('rounds').eq('id', leagueId).single();
+  const { data: teamRows } = await supabase
+    .from('league_teams')
+    .select('team_id')
+    .eq('league_id', leagueId);
+
+  const teamIds = (teamRows ?? []).map((r) => r.team_id);
+  if (teamIds.length < 2 || !league) {
+    throw new Error('لازم فريقين على الأقل لتوليد الجدول');
+  }
+
+  const fixtures = computeFixtures(teamIds, league.rounds as 1 | 2);
+
+  await supabase.from('matches').insert(
+    fixtures.map((f) => ({
+      league_id: leagueId,
+      round: f.round,
+      home_team_id: f.home,
+      away_team_id: f.away,
+      status: 'scheduled',
+    })),
+  );
+
+  await supabase.from('leagues').update({ status: 'active' }).eq('id', leagueId);
+  revalidatePath(`/admin/leagues/${leagueId}`);
+  redirect(`/admin/leagues/${leagueId}/schedule`);
+}
+
+export async function setMatchSchedule(matchId: string, formData: FormData) {
+  const supabase = await requireAdmin();
+
+  const venueId = String(formData.get('venue_id') ?? '') || null;
+  const date = String(formData.get('date') ?? '');
+  const time = String(formData.get('time') ?? '');
+  const kickoffAt = date && time ? new Date(`${date}T${time}:00`).toISOString() : null;
+
+  const { data: match } = await supabase
+    .from('matches')
+    .update({ venue_id: venueId, kickoff_at: kickoffAt })
+    .eq('id', matchId)
+    .select('league_id')
+    .single();
+
+  if (match) revalidatePath(`/admin/leagues/${match.league_id}/schedule`);
+}
+
+export async function enterResult(matchId: string, formData: FormData) {
+  const supabase = await requireAdmin();
+
+  const homeScore = Number(formData.get('home_score'));
+  const awayScore = Number(formData.get('away_score'));
+
+  // Each roster row is a stepper `goals_<playerId>` so a hat-trick is one
+  // number, not three taps on a checkbox that can only fire once.
+  const goalsByPlayer: { playerId: string; count: number }[] = [];
+  for (const [key, value] of formData.entries()) {
+    if (!key.startsWith('goals_')) continue;
+    const count = Number(value);
+    if (count > 0) goalsByPlayer.push({ playerId: key.slice('goals_'.length), count });
+  }
+
+  const { data: match, error } = await supabase
+    .from('matches')
+    .update({ home_score: homeScore, away_score: awayScore, status: 'played' })
+    .eq('id', matchId)
+    .select('id, league_id, home_team_id, away_team_id')
+    .single();
+
+  if (error || !match) throw new Error('تعذر حفظ النتيجة');
+
+  // Replace this match's goal events wholesale — simplest correct model for
+  // a correction (the admin re-enters the tally rather than editing a diff).
+  await supabase.from('match_events').delete().eq('match_id', matchId).eq('type', 'goal');
+
+  if (goalsByPlayer.length > 0) {
+    const { data: players } = await supabase
+      .from('players')
+      .select('id, team_id')
+      .in('id', goalsByPlayer.map((g) => g.playerId));
+    const byId = new Map((players ?? []).map((p) => [p.id, p.team_id]));
+
+    const events = goalsByPlayer
+      .filter((g) => byId.has(g.playerId))
+      .flatMap((g) =>
+        Array.from({ length: g.count }, () => ({
+          match_id: matchId,
+          player_id: g.playerId,
+          team_id: byId.get(g.playerId)!,
+          type: 'goal' as const,
+        })),
+      );
+
+    if (events.length > 0) await supabase.from('match_events').insert(events);
+  }
+
+  revalidatePath(`/admin/leagues/${match.league_id}`);
+  revalidatePath(`/admin/matches/${matchId}`);
+  redirect(`/admin/leagues/${match.league_id}/schedule`);
+}

@@ -15,6 +15,18 @@
   --rose: #fb7185;
   --radius: 0.7rem;
   --tap: 2.75rem; /* 44px minimum touch target */
+
+  /* Match/table semantics — win/draw/loss, paid/unpaid. Distinguishable
+     without reading: the standings table and a team's form rely on colour
+     alone at a glance. */
+  --win: #10b981;    /* = accent, a win is the positive outcome */
+  --win-ink: #04140d;
+  --draw: #9fb0c5;    /* = text-dim, a draw is neither */
+  --draw-ink: #0b1220;
+  --loss: #fb7185;    /* = rose */
+  --loss-ink: #2a0a0e;
+  --paid: #10b981;
+  --unpaid: #f59e0b;
 }
 
 @theme inline {
@@ -29,6 +41,14 @@
   --color-accent-ink: var(--accent-ink);
   --color-amber: var(--amber);
   --color-rose: var(--rose);
+  --color-win: var(--win);
+  --color-win-ink: var(--win-ink);
+  --color-draw: var(--draw);
+  --color-draw-ink: var(--draw-ink);
+  --color-loss: var(--loss);
+  --color-loss-ink: var(--loss-ink);
+  --color-paid: var(--paid);
+  --color-unpaid: var(--unpaid);
   --radius-app: var(--radius);
   --font-sans: var(--font-arabic), system-ui, sans-serif;
 }
