@@ -21,7 +21,7 @@ export default async function MyTeamPage() {
     .maybeSingle();
 
   let team = captainTeam;
-  let isCaptain = Boolean(captainTeam);
+  const isCaptain = Boolean(captainTeam);
 
   if (!team) {
     const { data: membership } = await supabase
@@ -61,11 +61,14 @@ export default async function MyTeamPage() {
   const availableLeagues = (openLeagues ?? []).filter((l) => !registeredIds.has(l.id));
 
   let inviteUrl: string | null = null;
-  if (team.invite_token) {
+  const { data: invite } = isCaptain
+    ? await supabase.from('team_invites').select('token').eq('team_id', team.id).maybeSingle()
+    : { data: null };
+  if (invite?.token) {
     const h = await headers();
     const host = h.get('host');
     const protocol = host?.startsWith('localhost') ? 'http' : 'https';
-    inviteUrl = host ? `${protocol}://${host}/join/${team.invite_token}` : `/join/${team.invite_token}`;
+    inviteUrl = host ? `${protocol}://${host}/join/${invite.token}` : `/join/${invite.token}`;
   }
 
   return (

@@ -30,7 +30,8 @@ export async function triggerPasswordReset(
   _prev: TriggerResetState,
   formData: FormData,
 ): Promise<TriggerResetState> {
-  const supabase = await requireAdmin();
+  await requireAdmin();
+  const supabase = createAdminClient();
   const profileId = String(formData.get('profile_id') ?? '');
   if (!profileId) return { code: null, error: 'errorGeneric' };
 
@@ -61,23 +62,13 @@ export async function redeemPasswordReset(
   const { data: profile } = await admin.from('profiles').select('id').eq('phone', phone).single();
   if (!profile) return { error: 'errorResetBadCode', done: false };
 
-  const { data: resets } = await admin
-    .from('password_resets')
-    .select('id, code_hash, expires_at, used_at')
-    .eq('profile_id', profile.id)
-    .is('used_at', null)
-    .order('created_at', { ascending: false })
-    .limit(1);
-
-  const reset = resets?.[0];
-  const valid =
-    reset && new Date(reset.expires_at) > new Date() && reset.code_hash === hashCode(code, profile.id);
-  if (!valid) return { error: 'errorResetBadCode', done: false };
+  const { data: consumed, error: consumeError } = await admin.rpc('consume_password_reset', {
+    p_phone: phone, p_hash: hashCode(code, profile.id),
+  });
+  if (consumeError || consumed !== profile.id) return { error: 'errorResetBadCode', done: false };
 
   const { error: updateError } = await admin.auth.admin.updateUserById(profile.id, { password });
   if (updateError) return { error: 'errorGeneric', done: false };
-
-  await admin.from('password_resets').update({ used_at: new Date().toISOString() }).eq('id', reset.id);
 
   revalidatePath('/login');
   return { error: null, done: true };

@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { setMatchSchedule } from '@/app/actions/admin';
+import { localDateTime } from '@/lib/time';
 import { buttonClasses } from '@/components/ui/button';
 
 export default async function SchedulePage({ params }: { params: Promise<{ id: string }> }) {
@@ -12,6 +13,8 @@ export default async function SchedulePage({ params }: { params: Promise<{ id: s
 
   const { data: league } = await supabase.from('leagues').select('id, name, city_id').eq('id', id).single();
   if (!league) notFound();
+  const { data: city } = await supabase.from('cities').select('timezone').eq('id', league.city_id).single();
+  if (!city) notFound();
 
   const [{ data: matches }, { data: venues }] = await Promise.all([
     supabase
@@ -96,13 +99,13 @@ export default async function SchedulePage({ params }: { params: Promise<{ id: s
                   <input
                     type="date"
                     name="date"
-                    defaultValue={m.kickoff_at ? m.kickoff_at.slice(0, 10) : ''}
+                    defaultValue={m.kickoff_at ? localDateTime(m.kickoff_at, city.timezone).date : ''}
                     className="tabular min-h-[var(--tap)] rounded-app border border-border bg-canvas px-2 text-sm"
                   />
                   <input
                     type="time"
                     name="time"
-                    defaultValue={m.kickoff_at ? m.kickoff_at.slice(11, 16) : ''}
+                    defaultValue={m.kickoff_at ? localDateTime(m.kickoff_at, city.timezone).time : ''}
                     className="tabular min-h-[var(--tap)] rounded-app border border-border bg-canvas px-2 text-sm"
                   />
                   <button type="submit" className={buttonClasses('outline', 'px-3 text-xs')}>

@@ -61,6 +61,7 @@
       "submit": "إنشاء الدوري"
     },
     "leagueSetup": {
+      "openRegistration": "فتح التسجيل للفرق",
       "viewPublic": "عرض الصفحة العامة ↗",
       "generateFixtures": "توليد جدول المباريات",
       "teamSingular": "فريق",

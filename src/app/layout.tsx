@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import { IBM_Plex_Sans_Arabic } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
-import { getMessages, getTranslations } from 'next-intl/server';
+import { getMessages } from 'next-intl/server';
 import './globals.css';
+import './maydan.css';
 
 const arabic = IBM_Plex_Sans_Arabic({
   subsets: ['arabic'],
@@ -11,8 +12,7 @@ const arabic = IBM_Plex_Sans_Arabic({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('app');
-  return { title: t('name'), description: t('tagline') };
+  return { title: 'Maydan — Your game. Your ground.', description: 'Community football in Palestine. Teams, leagues, fixtures, and local grounds in one place.' };
 }
 
 export default async function RootLayout({
@@ -23,7 +23,7 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang="ar" dir="rtl" className={`${arabic.variable} h-full`}>
+    <html lang="en" dir="ltr" className={`${arabic.variable} h-full`}>
       <body className="min-h-full antialiased">
         <NextIntlClientProvider messages={messages}>
           {children}
@@ -32,3 +32,4 @@ export default async function RootLayout({
     </html>
   );
 }
+

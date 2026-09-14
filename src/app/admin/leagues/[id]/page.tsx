@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
-import { addPayment, addTeam, addVenue, generateLeagueFixtures, togglePaid } from '@/app/actions/admin';
+import { addPayment, addTeam, addVenue, generateLeagueFixtures, togglePaid, openLeague } from '@/app/actions/admin';
 import { Button, buttonClasses } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
 import { ScoreboardTag } from '@/components/ui/scoreboard-tag';
@@ -48,9 +48,10 @@ export default async function LeagueSetupPage({ params }: { params: Promise<{ id
         </Link>
       </div>
 
-      {league.status === 'draft' && (
+      {league.status === 'draft' && <form action={openLeague.bind(null, id)}><Button type="submit">{t('openRegistration')}</Button></form>}
+      {['draft', 'open'].includes(league.status) && (
         <form action={generateLeagueFixtures.bind(null, id)}>
-          <Button type="submit" disabled={teams.length < 2} className="w-full">
+          <Button type="submit" disabled={teams.filter(t => t.paid).length < 2} className="w-full">
             {t('generateFixtures')} ({teams.length} {teams.length === 1 ? t('teamSingular') : t('teamPlural')})
           </Button>
           {teams.length < 2 && (

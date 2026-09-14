@@ -71,7 +71,7 @@ export async function login(
 
   const next = String(formData.get('next') ?? '').trim();
   revalidatePath('/', 'layout');
-  redirect(next.startsWith('/') ? next : '/');
+  redirect(next.startsWith('/') && !next.startsWith('//') && !next.includes('\\') ? next : '/');
 }
 
 export async function logout() {

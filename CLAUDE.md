@@ -2,6 +2,7 @@
 
 Amateur sports league platform for Palestine. Arabic-first, RTL. Web now, Expo mobile later.
 
+- `appidea.md` — original product spec, full vision. MUST read before any feature work, any scope decision, or any brainstorming session. Numbers/examples in it (7v7, 8 teams, 200 ILS, Jenin) are launch config, not hard limits — never hardcode them. If a request conflicts with it, flag conflict, don't hallucinate scope.
 - `docs/superpowers/specs/2026-09-10-leaguesapp-design.md` — the design. Read before any feature work; it settles the data model and the core decisions.
 - `docs/superpowers/plans/` — implementation plans, one per group of spec slices. Execute the active plan task by task with `superpowers:subagent-driven-development`.
 - `docs/STACK.md` — stack rationale. Read only when changing the stack.
@@ -27,7 +28,7 @@ Next.js 15 App Router · TypeScript · Tailwind v4 · shadcn/ui · Supabase (Pos
 
 - Auth v1: **phone + password**. No SMS OTP — it costs money.
 - Payments: **records only, admin-confirmed**. Cash, bank transfer, Reflect, iBuraq. No gateway.
-- Notifications (slice 7): **OpenWA** self-hosted WhatsApp, outbound only, five templated messages. No inbound parsing. Never auth. `docs/OPENWA.md`.
+- Notifications: **cut from scope**. No OpenWA, no WhatsApp gateway, no outbound messaging. `docs/OPENWA.md` is dead, ignore it.
 
 ## Arabic / RTL — non-negotiable
 
@@ -42,8 +43,18 @@ Next.js 15 App Router · TypeScript · Tailwind v4 · shadcn/ui · Supabase (Pos
 
 ## Do not build
 
-Payment gateway · automated venue booking · live match mode · ELO rating · transfer market · knockout tournaments · AI scheduling · a separate admin app. Admin is role-gated routes in the same app.
+Payment gateway · automated venue booking · live match mode · ELO rating · transfer market · knockout tournaments · AI scheduling · a separate admin app · WhatsApp/notifications (OpenWA cut). Admin is role-gated routes in the same app.
 
 ## Before claiming done
 
 Run `npx tsc --noEmit`. Leave one assert-based check behind for any non-trivial logic.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

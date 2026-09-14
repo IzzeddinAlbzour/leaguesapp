@@ -80,7 +80,6 @@ export async function addTeam(leagueId: string, formData: FormData) {
       slug: generateSlug(),
       city_id: league.city_id,
       captain_name: captainName || null,
-      invite_token: generateSlug(),
     })
     .select('id')
     .single();
@@ -150,7 +149,7 @@ export async function generateLeagueFixtures(leagueId: string) {
   const { data: teamRows } = await supabase
     .from('league_teams')
     .select('team_id')
-    .eq('league_id', leagueId);
+    .eq('league_id', leagueId).eq('paid', true);
 
   const teamIds = (teamRows ?? []).map((r) => r.team_id);
   if (teamIds.length < 2 || !league) {
@@ -159,17 +158,8 @@ export async function generateLeagueFixtures(leagueId: string) {
 
   const fixtures = computeFixtures(teamIds, league.rounds as 1 | 2);
 
-  await supabase.from('matches').insert(
-    fixtures.map((f) => ({
-      league_id: leagueId,
-      round: f.round,
-      home_team_id: f.home,
-      away_team_id: f.away,
-      status: 'scheduled',
-    })),
-  );
-
-  await supabase.from('leagues').update({ status: 'active' }).eq('id', leagueId);
+  const { error } = await supabase.rpc('publish_fixtures', { p_league: leagueId, p_fixtures: fixtures });
+  if (error) throw new Error('تعذّر نشر الجدول. تأكد من الدفعات وإنه الجدول مش منشور من قبل.');
   revalidatePath(`/admin/leagues/${leagueId}`);
   redirect(`/admin/leagues/${leagueId}/schedule`);
 }
@@ -180,16 +170,12 @@ export async function setMatchSchedule(matchId: string, formData: FormData) {
   const venueId = String(formData.get('venue_id') ?? '') || null;
   const date = String(formData.get('date') ?? '');
   const time = String(formData.get('time') ?? '');
-  const kickoffAt = date && time ? new Date(`${date}T${time}:00`).toISOString() : null;
-
-  const { data: match } = await supabase
-    .from('matches')
-    .update({ venue_id: venueId, kickoff_at: kickoffAt })
-    .eq('id', matchId)
-    .select('league_id')
-    .single();
-
-  if (match) revalidatePath(`/admin/leagues/${match.league_id}/schedule`);
+  if ((date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) || (time && !/^\d{2}:\d{2}$/.test(time))) throw new Error('راجع التاريخ والوقت');
+  const { data: leagueId, error } = await supabase.rpc('schedule_match', {
+    p_match: matchId, p_venue: venueId, p_local_time: date && time ? `${date}T${time}:00` : null,
+  });
+  if (error) throw new Error('تعذّر حفظ الموعد. راجع الملعب والتاريخ.');
+  revalidatePath(`/admin/leagues/${leagueId}/schedule`);
 }
 
 export async function enterResult(matchId: string, formData: FormData) {
@@ -197,6 +183,10 @@ export async function enterResult(matchId: string, formData: FormData) {
 
   const homeScore = Number(formData.get('home_score'));
   const awayScore = Number(formData.get('away_score'));
+  if (formData.get('home_score') === null || formData.get('away_score') === null ||
+    !Number.isInteger(homeScore) || !Number.isInteger(awayScore) || homeScore < 0 || awayScore < 0 || homeScore > 100 || awayScore > 100) {
+    throw new Error('راجع النتيجة: لازم أرقام صحيحة بين 0 و100');
+  }
 
   // Each roster row is a stepper `goals_<playerId>` so a hat-trick is one
   // number, not three taps on a checkbox that can only fire once.
@@ -204,44 +194,23 @@ export async function enterResult(matchId: string, formData: FormData) {
   for (const [key, value] of formData.entries()) {
     if (!key.startsWith('goals_')) continue;
     const count = Number(value);
+    if (!Number.isInteger(count) || count < 0 || count > 100) throw new Error('راجع عدد الأهداف');
     if (count > 0) goalsByPlayer.push({ playerId: key.slice('goals_'.length), count });
   }
 
-  const { data: match, error } = await supabase
-    .from('matches')
-    .update({ home_score: homeScore, away_score: awayScore, status: 'played' })
-    .eq('id', matchId)
-    .select('id, league_id, home_team_id, away_team_id')
-    .single();
-
-  if (error || !match) throw new Error('تعذر حفظ النتيجة');
-
-  // Replace this match's goal events wholesale — simplest correct model for
-  // a correction (the admin re-enters the tally rather than editing a diff).
-  await supabase.from('match_events').delete().eq('match_id', matchId).eq('type', 'goal');
-
-  if (goalsByPlayer.length > 0) {
-    const { data: players } = await supabase
-      .from('players')
-      .select('id, team_id')
-      .in('id', goalsByPlayer.map((g) => g.playerId));
-    const byId = new Map((players ?? []).map((p) => [p.id, p.team_id]));
-
-    const events = goalsByPlayer
-      .filter((g) => byId.has(g.playerId))
-      .flatMap((g) =>
-        Array.from({ length: g.count }, () => ({
-          match_id: matchId,
-          player_id: g.playerId,
-          team_id: byId.get(g.playerId)!,
-          type: 'goal' as const,
-        })),
-      );
-
-    if (events.length > 0) await supabase.from('match_events').insert(events);
-  }
-
-  revalidatePath(`/admin/leagues/${match.league_id}`);
+  const { data: leagueId, error } = await supabase.rpc('save_match_result', {
+    p_match: matchId, p_home: homeScore, p_away: awayScore,
+    p_goals: goalsByPlayer.map(g => ({ player_id: g.playerId, count: g.count })),
+  });
+  if (error || !leagueId) throw new Error('تعذّر حفظ النتيجة. راجع اللاعبين والأهداف وحاول كمان مرة.');
+  revalidatePath(`/admin/leagues/${leagueId}`);
   revalidatePath(`/admin/matches/${matchId}`);
-  redirect(`/admin/leagues/${match.league_id}/schedule`);
+  redirect(`/admin/leagues/${leagueId}/schedule`);
+}
+
+export async function openLeague(leagueId: string) {
+  const supabase = await requireAdmin();
+  const { error } = await supabase.from('leagues').update({ status: 'open' }).eq('id', leagueId).eq('status', 'draft');
+  if (error) throw new Error('تعذّر فتح التسجيل');
+  revalidatePath(`/admin/leagues/${leagueId}`);
 }

@@ -8,7 +8,7 @@ export default async function PlayerCardPage({ params }: { params: Promise<{ id:
   const t = await getTranslations('playerCard');
   const supabase = await createClient();
 
-  let playerId = id;
+  const playerId = id;
   if (id === 'me') {
     const { data } = await supabase.auth.getUser();
     if (!data.user) redirect('/login');

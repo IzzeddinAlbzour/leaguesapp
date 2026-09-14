@@ -1,0 +1,22 @@
+'use client';
+import Link from 'next/link';
+import { useEffect, useRef, type ReactNode } from 'react';
+import { Icon } from './icon';
+import { useMaydan } from './context';
+import { teamById, type Team } from '@/lib/maydan/data';
+
+export function Crest({ team, size = 'md' }: { team: Team | string; size?: 'sm' | 'md' | 'lg' | 'xl' }) { const item = typeof team === 'string' ? teamById(team) : team; return <span className={`md-crest ${size}`} style={{ '--crest-color': item.color } as React.CSSProperties} aria-label={item.name}><span>{item.short}</span><i>★</i></span>; }
+export function Badge({ children, tone = '' }: { children: ReactNode; tone?: string }) { return <span className={`md-badge ${tone}`}>{children}</span>; }
+export function Action({ children, href, onClick, secondary = false, icon, disabled = false, type = 'button' }: { children: ReactNode; href?: string; onClick?: () => void; secondary?: boolean; icon?: string; disabled?: boolean; type?: 'button' | 'submit' }) { const className = `md-button ${secondary ? 'secondary' : ''}`; const content = <>{icon && <Icon name={icon} size={17}/>}<span>{children}</span></>; return href ? <Link className={className} href={href}>{content}</Link> : <button className={className} type={type} onClick={onClick} disabled={disabled}>{content}</button>; }
+export function SectionTitle({ title, subtitle, href, action }: { title: string; subtitle?: string; href?: string; action?: string }) { return <div className="md-section-title"><div><h2>{title}</h2>{subtitle && <p>{subtitle}</p>}</div>{href && <Link href={href}>{action ?? 'View all'}<Icon name="arrow" size={16}/></Link>}</div>; }
+export function PageTitle({ eyebrow, title, description, children }: { eyebrow?: string; title: string; description?: string; children?: ReactNode }) { return <div className="md-page-title"><div>{eyebrow && <span className="md-eyebrow">{eyebrow}</span>}<h1>{title}</h1>{description && <p>{description}</p>}</div>{children && <div className="md-title-actions">{children}</div>}</div>; }
+export function Empty({ title, description, href, action }: { title: string; description: string; href?: string; action?: string }) { return <div className="md-empty"><Icon name="search" size={32}/><h3>{title}</h3><p>{description}</p>{href && <Action href={href}>{action}</Action>}</div>; }
+export function Tabs({ items, active, onChange }: { items: string[]; active: string; onChange: (value: string) => void }) { return <div className="md-tabs" role="tablist">{items.map(item => <button key={item} role="tab" aria-selected={active === item} onClick={() => onChange(item)}>{item}</button>)}</div>; }
+export function FormField({ label, name, value, type = 'text', required = false, options, min, max, placeholder }: { label: string; name: string; value?: string | number; type?: string; required?: boolean; options?: string[]; min?: number; max?: number; placeholder?: string }) { return <label className="md-field"><span>{label}{required && <em> *</em>}</span>{options ? <select name={name} defaultValue={value} required={required}>{options.map(o => <option key={o}>{o}</option>)}</select> : type === 'textarea' ? <textarea name={name} defaultValue={value} required={required} rows={4} maxLength={2000} placeholder={placeholder}/> : <input name={name} type={type} defaultValue={value} required={required} min={min} max={max} placeholder={placeholder}/>}</label>; }
+export function Modal({ title, children, onClose }: { title: string; children: ReactNode; onClose: () => void }) {
+  const ref = useRef<HTMLDialogElement>(null);
+  const { t } = useMaydan();
+  useEffect(() => { const dialog = ref.current; dialog?.showModal(); const previous = document.activeElement as HTMLElement; return () => { dialog?.close(); previous?.focus(); }; }, []);
+  return <dialog className="md-modal" ref={ref} onCancel={onClose} onClick={e => { if (e.target === ref.current) onClose(); }}><div className="md-modal-heading"><h2>{title}</h2><button className="md-icon-button" onClick={onClose} aria-label={t('Close', 'إغلاق')}><Icon name="close"/></button></div>{children}</dialog>;
+}
+export function FormRun({ children, onSave, submit = 'Save changes' }: { children: ReactNode; onSave: (data: FormData) => void; submit?: string }) { return <form className="md-form" onSubmit={e => { e.preventDefault(); onSave(new FormData(e.currentTarget)); }}>{children}<div className="md-form-footer"><Action type="submit" icon="check">{submit}</Action></div></form>; }

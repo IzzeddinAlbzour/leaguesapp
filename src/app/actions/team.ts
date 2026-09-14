@@ -27,7 +27,6 @@ export async function createTeam(_prev: CreateTeamState, formData: FormData): Pr
       name,
       city_id: cityId,
       slug: generateSlug(),
-      invite_token: generateSlug(),
       captain_id: userId,
     })
     .select('id')
@@ -53,8 +52,9 @@ export async function joinTeam(
   const { userId } = await requireUser();
   const admin = createAdminClient();
 
-  const { data: team } = await admin.from('teams').select('id').eq('invite_token', token).single();
-  if (!team) return { error: 'errorGeneric', joined: false };
+  const { data: invite } = await admin.from('team_invites').select('team_id').eq('token', token).single();
+  if (!invite) return { error: 'errorGeneric', joined: false };
+  const team = { id: invite.team_id };
 
   const { data: existing } = await admin
     .from('players')

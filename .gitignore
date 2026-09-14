@@ -1,5 +1,6 @@
 # dependencies
 /node_modules
+/.local/
 /.pnp
 .pnp.*
 
@@ -16,6 +17,7 @@ next-env.d.ts
 # env
 .env
 .env.*
+!.env.example
 
 # deploy
 .vercel
